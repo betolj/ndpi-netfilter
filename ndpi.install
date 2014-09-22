@@ -24,7 +24,7 @@ make install
 3. ndpi-netfilter
 apt-get install iptables-dev 
 cd /usr/src
-tar xvf ndpi-netfilter.patch.tar.gz
+#tar xvf ndpi-netfilter.patch.tar.gz
 NDPI_PATH=/usr/src/nDPI make
 make modules_install
 cp /usr/src/ndpi-netfilter/ipt/libxt_ndpi.so /lib/xtables/
