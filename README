@@ -1,0 +1,50 @@
+This package is a GPL implementation of an iptables and netfilter module for
+nDPI integration into the Linux kernel.
+
+The prerequisites are:
+
+- Tested on Debian 6.0 (Kernel 2.6.32-5)
+- Following packages to compile kernel-modules:
+   linux-headers
+   iptables-dev >= version 1.4.8-3
+   nDPI source package
+
+
+Compiled kernel features
+------------------------
+
+You do not need to do the below steps for Debian 6
+
+In order to use nDPI as a kernel module notice that:
+
+- You should ENABLE Netfilter conntrack events (and also enable Advanced
+  netfilter features to see it).
+
+In kernel 2.6.34 its defined as:
+
+Connection tracking events
+Symbol: NF_CONNTRACK_EVENTS
+Location:
+-> Networking support
+ -> Networking options
+  -> Network packet filtering framework (Netfilter)
+   -> Core Netfilter Configuration
+    -> Netfilter connection tracking support
+
+- If your kernel version is 2.6.31 or greater, then you should DISABLE
+  Netfilter conntrack for the Netlink protocol.
+
+In kernel 2.6.34 its defined as:
+
+Connection tracking netlink interface
+Symbol: NF_CT_NETLINK
+Location:
+-> Networking support
+ -> Networking options
+  -> Network packet filtering framework (Netfilter)
+   -> Core Netfilter Configuration
+    -> Netfilter connection tracking support
+
+
+Once you have downloaded/installed each package and checked for the above
+kernel features you can read the INSTALL file.
