@@ -1,0 +1,31 @@
+#
+# Steps to build ndpi-netfilter on Ubuntu/Debian
+#
+# - Remove nf_conntrack_netlink module (on boot):
+#   rmmod nf_conntrack_netlink
+#
+
+1. Install kernel sources
+apt-get install linux-source
+
+2. Install nDPI
+apt-get install libtool
+apt-get install autoconf
+apt-get install pkg-config
+apt-get install subversion
+cd /usr/src
+svn co https://svn.ntop.org/svn/ntop/trunk/nDPI
+cd nDPI
+./autogen.sh
+#./configure –with-pic
+make
+make install
+
+3. ndpi-netfilter
+apt-get install iptables-dev 
+cd /usr/src
+tar xvf ndpi-netfilter.patch.tar.gz
+NDPI_PATH=/usr/src/nDPI make
+make modules_install
+cp /usr/src/ndpi-netfilter/ipt/libxt_ndpi.so /lib/xtables/
+
