@@ -30,7 +30,7 @@ struct xt_ndpi_mtinfo {
         NDPI_PROTOCOL_BITMASK flags;
 };
 #ifndef NDPI_PROTOCOL_LONG_STRING
-#define NDPI_PROTOCOL_LONG_STRING "Unknown","FTP","POP","SMTP","IMAP","DNS","IPP","HTTP","MDNS","NTP","NETBIOS",\
+#define NDPI_PROTOCOL_LONG_STRING "Unknown","FTP-Data","POP","SMTP","IMAP","DNS","IPP","HTTP","MDNS","NTP","NETBIOS",\
 "NFS","SSDP","BGP","SNMP","XDMCP","SMB","SYSLOG","DHCP","PostgreSQL","MySQL",\
 "TDS","DirectDownloadLink","I23V5","AppleJuice","DirectConnect","Socrates","WinMX","VMware","PANDO","Filetopia",\
 "iMESH","Kontiki","OpenFT","Kazaa","Gnutella","eDonkey","Bittorrent","OFF","AVI","Flash",\
@@ -49,7 +49,7 @@ struct xt_ndpi_mtinfo {
 #endif
 
 #ifndef NDPI_PROTOCOL_SHORT_STRING
-#define NDPI_PROTOCOL_SHORT_STRING "ukn","ftp","pop","smtp","imap","dns","ipp","http","mdns","ntp","netbios",\
+#define NDPI_PROTOCOL_SHORT_STRING "ukn","ftp_data","pop","smtp","imap","dns","ipp","http","mdns","ntp","netbios",\
 "nfs","ssdp","bgp","snmp","xdmcp","smb","syslog","dhcp","postgres","mysql",\
 "tds","ddl","i23v5","applejuice","directconnect","socrates","winmx","vmware","pando","filetopia",\
 "iMESH","kontiki","openft","fasttrack","gnutella","edonkey","bittorrent","off","avi","flash",\
