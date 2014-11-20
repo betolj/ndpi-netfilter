@@ -29,46 +29,48 @@
 struct xt_ndpi_mtinfo {
         NDPI_PROTOCOL_BITMASK flags;
 };
+
+/* /usr/src/nDPI/src/include/ndpi_protocol_ids.h */
 #ifndef NDPI_PROTOCOL_LONG_STRING
-#define NDPI_PROTOCOL_LONG_STRING "Unknown","FTP-Data","POP","SMTP","IMAP","DNS","IPP","HTTP","MDNS","NTP","NETBIOS",\
-"NFS","SSDP","BGP","SNMP","XDMCP","SMB","SYSLOG","DHCP","PostgreSQL","MySQL",\
-"TDS","DirectDownloadLink","I23V5","AppleJuice","DirectConnect","Socrates","WinMX","VMware","PANDO","Filetopia",\
-"iMESH","Kontiki","OpenFT","Kazaa","Gnutella","eDonkey","Bittorrent","OFF","AVI","Flash",\
-"OGG","MPEG","QuickTime","RealMedia","Windowsmedia","MMS","XBOX","QQ","MOVE","RTSP",\
-"IMAPS","Icecast","PPLive","PPStream","Zattoo","SHOUTCast","SopCast","TVAnts","TVUplayer","VeohTV",\
-"QQLive","Thunder","Soulseek","GaduGadu","IRC","Popo","Unencrypted_Jabber","MSN","Oscar","Yahoo",\
-"Battlefield","Quake","VRRP","Steam","Halflife2","World_of_Warcraft","Telnet","STUN","IPSEC","GRE",\
-"ICMP","IGMP","EGP","SCTP","OSPF","IP_in_IP","RTP","RDP","VNC","PCAnywhere",\
-"SSL","SSH","USENET","MGCP","IAX","TFTP","AFP","StealthNet","Aimini","SIP",\
-"Truphone","ICMPv6","DHCPv6","Armagetron","CrossFire","Dofus","Fiesta","Florensia","Guildwars","HTTP_Application_Activesync",\
-"Kerberos","LDAP","MapleStory","msSQL","PPTP","WARCRAFT3","World_of_Kung_Fu","MEEBO","FaceBook","Twitter",\
-"DropBox","Gmail","Google_Maps","YouTube","Skype","Google","DCE_RPC","NetFlow_IPFIX","sFlow","HTTP_Connect_SSL_over_HTTP",\
-"HTTP_Proxy","Citrix","Netflix","LastFM","Grooveshark","SkyFile_Prepaid","SkyFile_Rudics","SkyFile_Postpaid","CitrixOnline","Apple_iMessage_FaceTime",\
-"Webex","WhatsApp","Apple_iCloud","Viber","Apple_iTunes","Radius","Windows_Update","TeamViewer","Tuenti","Lotus_Notes",\
-"SAP","GTP","uPnP","LLMNR","Remote_Scan","Spotify","WebM","H323","OpenVPN","NOE","CiscoVPN","TeamSpeak","Tor","Skinny","RTCP","RSYNC","Oracle","Corba","Ubuntu_ONE","WHOIS_DAS"
+#define NDPI_PROTOCOL_LONG_STRING "Unknown","FTP_CONTROL","MAIL_POP","MAIL_SMTP","MAIL_IMAP","DNS","IPP","HTTP","MDNS","NTP",\
+"NETBIOS","NFS","SSDP","BGP","SNMP","XDMCP","SMB","SYSLOG","DHCP","POSTGRES","MYSQL","TDS","DIRECT_DOWNLOAD_LINK","MAIL_POPS",\
+"APPLEJUICE","DIRECTCONNECT","SOCRATES","WINMX","VMWARE","MAIL_SMTPS",\
+"FILETOPIA","IMESH","KONTIKI","OPENFT","FASTTRACK","GNUTELLA","EDONKEY","BITTORRENT",\
+"EPP","AVI","FLASH","OGG","MPEG","QUICKTIME","REALMEDIA","WINDOWSMEDIA","MMS","XBOX","QQ","MOVE","RTSP","MAIL_IMAPS","ICECAST",\
+"PPLIVE","PPSTREAM","ZATTOO","SHOUTCAST","SOPCAST","TVANTS","TVUPLAYER","HTTP_APPLICATION_VEOHTV","QQLIVE","THUNDER","SOULSEEK",\
+"SSL_NO_CERT","IRC","AYIYA","UNENCRYPED_JABBER","MSN","OSCAR","YAHOO","BATTLEFIELD","QUAKE","VRRP","STEAM","HALFLIFE2",\
+"WORLDOFWARCRAFT","TELNET","STUN","IPSEC","GRE","ICMP","IGMP","EGP","SCTP","OSPF","IP_IN_IP","RTP","RDP","VNC","PCANYWHERE",\
+"SSL","SSH","USENET","MGCP","IAX","TFTP","AFP","STEALTHNET","AIMINI","SIP","TRUPHONE","ICMPV6","DHCPV6","ARMAGETRON",\
+"CROSSFIRE","DOFUS","FIESTA","FLORENSIA","GUILDWARS","HTTP_APPLICATION_ACTIVESYNC","KERBEROS","LDAP","MAPLESTORY","MSSQL",\
+"PPTP","WARCRAFT3","WORLD_OF_KUNG_FU","MEEBO","FACEBOOK","TWITTER","DROPBOX","GMAIL","GOOGLE_MAPS","YOUTUBE","SKYPE","GOOGLE",\
+"DCERPC","NETFLOW","SFLOW","HTTP_CONNECT","HTTP_PROXY","CITRIX","NETFLIX","LASTFM","GROOVESHARK",\
+"SKYFILE_PREPAID","SKYFILE_RUDICS","SKYFILE_POSTPAID","CITRIX_ONLINE","APPLE","WEBEX","WHATSAPP","APPLE_ICLOUD","VIBER",\
+"APPLE_ITUNES","RADIUS","WINDOWS_UPDATE","TEAMVIEWER","TUENTI","LOTUS_NOTES","SAP","GTP","UPNP","LLMNR","REMOTE_SCAN","SPOTIFY",\
+"WEBM","H323","OPENVPN","NOE","CISCOVPN","TEAMSPEAK","TOR","SKINNY","RTCP","RSYNC","ORACLE","CORBA","UBUNTUONE","WHOIS_DAS",\
+"COLLECTD","SOCKS5","SOCKS4","RTMP","FTP_DATA","WIKIPEDIA","ZMQ","AMAZON","EBAY","CNN","MEGACO","REDIS","PANDO","VHUA","TELEGRAM"
 #endif
 
 #ifndef NDPI_PROTOCOL_SHORT_STRING
-#define NDPI_PROTOCOL_SHORT_STRING "ukn","ftp_data","pop","smtp","imap","dns","ipp","http","mdns","ntp","netbios",\
-"nfs","ssdp","bgp","snmp","xdmcp","smb","syslog","dhcp","postgres","mysql",\
-"tds","ddl","i23v5","applejuice","directconnect","socrates","winmx","vmware","pando","filetopia",\
-"iMESH","kontiki","openft","fasttrack","gnutella","edonkey","bittorrent","off","avi","flash",\
-"ogg","mpeg","quicktime","realmedia","windowsmedia","mms","xbox","qq","move","rtsp",\
-"imaps","icecast","pplive","ppstream","zattoo","shoutcast","sopcast","tvants","tvuplayer","veohtv",\
-"qqlive","thunder","soulseek","gadugadu","irc","popo","jabber","msn","oscar","yahoo",\
-"battlefield","quake","vrrp","steam","hl2","worldofwarcraft","telnet","stun","ipsec","gre",\
-"icmp","igmp","egp","sctp","ospf","ipip","rtp","rdp","vnc","pcanywhere",\
-"ssl","ssh","usenet","mgcp","iax","tftp","afp","stealthnet","aimini","sip",\
-"truphone","icmpv6","dhcpv6","armagetron","crossfire","dofus","fiesta","florensia","guildwars","httpactivesync",\
-"kerberos","ldap","maplestory","mssql","pptp","warcraft3","wokf","meebo","facebook","twitter",\
-"dropbox","gmail","gmaps","youtube","skype","google","dcerpc","netflow","sflow","httpconnect",\
-"httpproxy","citrix","netflix","lastfm","grooveshark","skyfileprepaid","skyfilerudics","skyfilepostpaid","citrixonline","apple",\
-"webex","wgatsapp","appleicloud","viber","appleitunes","radius","windowsupdate","teamviewer","tuenti","lotusnotes",\
-"sap","gtp","upnp","llmnr","remotescan","spotify","webm","h323","openvpn","noe","ciscovpn","teamspeak","tor","skinny","rtcp","rsync","oracle","corba","ubuntuone","whoisdas"
+#define NDPI_PROTOCOL_SHORT_STRING "ukn","ftp","pop","smtp","imap","dns","ipp","http","mdns","ntp",\
+"netbios","nfs","ssdp","bgp","snmp","xdmcp","smb","syslog","dhcp","postgres","mysql","tds","directdownload","pops",\
+"applejuice","directconnect","socrates","winmx","vmware","smtps",\
+"filetopia","imesh","kontiki","openft","fasttrack","gnutella","edonkey","bittorrent",\
+"epp","avi","flash","ogg","mpeg","quicktime","realmedia","windowsmedia","mms","xbox","qq","move","rtsp","imaps","icecast",\
+"pplive","ppstream","zattoo","shoutcast","sopcast","tvants","tvuplayer","http_application_veohtv","qqlive","thunder","soulseek",\
+"ssl_no_cert","irc","ayiya","unencryped_jabber","msn","oscar","yahoo","battlefield","quake","vrrp","steam","halflife2",\
+"worldofwarcraft","telnet","stun","ipsec","gre","icmp","igmp","egp","sctp","ospf","ipip","rtp","rdp","vnc","pcanywhere",\
+"ssl","ssh","usenet","mgcp","iax","tftp","afp","stealthnet","aimini","sip","truphone","icmpv6","dhcpv6","armagetron",\
+"crossfire","dofus","fiesta","florensia","guildwars","http_application_activesync","kerberos","ldap","maplestory","mssql",\
+"pptp","warcraft3","world_of_kung_fu","meebo","facebook","twitter","dropbox","gmail","google_maps","youtube","skype","google",\
+"dcerpc","netflow","sflow","http_connect","http_proxy","citrix","netflix","lastfm","grooveshark",\
+"skyfile_prepaid","skyfile_rudics","skyfile_postpaid","citrix_online","apple","webex","whatsapp","apple_icloud","viber",\
+"apple_itunes","radius","windows_update","teamviewer","tuenti","lotusnotes","sap","gtp","upnp","llmnr","remotescan","spotify",\
+"webm","h323","openvpn","noe","ciscovpn","teamspeak","tor","skinny","rtcp","rsync","oracle","corba","ubuntuone","whois_das",\
+"collectd","socks5","socks4","rtmp","ftpdata","wikipedia","zmq","amazon","ebay","cnn","megaco","redis","pando","vhua","telegram"
 #endif
 
 #ifndef NDPI_LAST_NFPROTO
-#define NDPI_LAST_NFPROTO NDPI_LAST_IMPLEMENTED_PROTOCOL-13
+#define NDPI_LAST_NFPROTO NDPI_LAST_IMPLEMENTED_PROTOCOL
 #endif
 
 #endif /* _LINUX_NETFILTER_XT_NDPI_H */
