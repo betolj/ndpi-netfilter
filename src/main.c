@@ -445,8 +445,8 @@ ndpi_process_packet(struct nf_conn * ct, const uint64_t time,
         proto = ndpi_detection_process_packet(ndpi_struct,flow->ndpi_flow,
                                                 (uint8_t *) iph, ipsize, time,
                                                 src->ndpi_id, dst->ndpi_id);
-        flow->detected_protocol = proto;
         flow->detection_completed = 0;
+        flow->detected_protocol = proto;
         if (flow->detected_protocol != NDPI_PROTOCOL_UNKNOWN) {
                 flow->detection_completed = 1;
         }
