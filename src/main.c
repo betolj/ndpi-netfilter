@@ -410,6 +410,7 @@ ndpi_process_packet(struct nf_conn * ct, const uint64_t time,
         spin_unlock_bh (&flow_lock);
         if (flow == NULL){
                 flow = ndpi_alloc_flow(ct);
+                flow->detection_completed = 0;
                 if (flow == NULL)
                         return proto;
         }
@@ -445,6 +446,7 @@ ndpi_process_packet(struct nf_conn * ct, const uint64_t time,
                                                 (uint8_t *) iph, ipsize, time,
                                                 src->ndpi_id, dst->ndpi_id);
         flow->detected_protocol = proto;
+        flow->detection_completed = 0;
         if (flow->detected_protocol != NDPI_PROTOCOL_UNKNOWN) {
                 flow->detection_completed = 1;
         }
