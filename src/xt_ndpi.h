@@ -2,6 +2,7 @@
  * xt_ndpi.h
  * Copyright (C) 2010-2012 G. Elian Gidoni <geg@gnu.org>
  *               2012 Ed Wildgoose <lists@wildgooses.com>
+ *               2014 Humberto Jucá <betolj@gmail.com>
  * 
  * This file is part of nDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -47,11 +48,12 @@ struct xt_ndpi_mtinfo {
 "SKYFILE_PREPAID","SKYFILE_RUDICS","SKYFILE_POSTPAID","CITRIX_ONLINE","APPLE","WEBEX","WHATSAPP","APPLE_ICLOUD","VIBER",\
 "APPLE_ITUNES","RADIUS","WINDOWS_UPDATE","TEAMVIEWER","TUENTI","LOTUS_NOTES","SAP","GTP","UPNP","LLMNR","REMOTE_SCAN","SPOTIFY",\
 "WEBM","H323","OPENVPN","NOE","CISCOVPN","TEAMSPEAK","TOR","SKINNY","RTCP","RSYNC","ORACLE","CORBA","UBUNTUONE","WHOIS_DAS",\
-"COLLECTD","SOCKS5","SOCKS4","RTMP","FTP_DATA","WIKIPEDIA","ZMQ","AMAZON","EBAY","CNN","MEGACO","REDIS","PANDO","VHUA","TELEGRAM"
+"COLLECTD","SOCKS5","SOCKS4","RTMP","FTP_DATA","WIKIPEDIA","ZMQ","AMAZON","EBAY","CNN","MEGACO","REDIS","PANDO","VHUA","TELEGRAM",\
+"VEVO","PANDORA","QUIC","WHATSAPP_VOICE","CHECK"
 #endif
 
 #ifndef NDPI_PROTOCOL_SHORT_STRING
-#define NDPI_PROTOCOL_SHORT_STRING "ukn","ftp","pop","smtp","imap","dns","ipp","http","mdns","ntp",\
+#define NDPI_PROTOCOL_SHORT_STRING "unknown","ftp","pop","smtp","imap","dns","ipp","http","mdns","ntp",\
 "netbios","nfs","ssdp","bgp","snmp","xdmcp","smb","syslog","dhcp","postgres","mysql","tds","directdownload","pops",\
 "applejuice","directconnect","socrates","winmx","vmware","smtps",\
 "filetopia","imesh","kontiki","openft","fasttrack","gnutella","edonkey","bittorrent",\
@@ -66,11 +68,12 @@ struct xt_ndpi_mtinfo {
 "skyfile_prepaid","skyfile_rudics","skyfile_postpaid","citrix_online","apple","webex","whatsapp","apple_icloud","viber",\
 "apple_itunes","radius","windows_update","teamviewer","tuenti","lotusnotes","sap","gtp","upnp","llmnr","remotescan","spotify",\
 "webm","h323","openvpn","noe","ciscovpn","teamspeak","tor","skinny","rtcp","rsync","oracle","corba","ubuntuone","whois_das",\
-"collectd","socks5","socks4","rtmp","ftpdata","wikipedia","zmq","amazon","ebay","cnn","megaco","redis","pando","vhua","telegram"
+"collectd","socks5","socks4","rtmp","ftpdata","wikipedia","zmq","amazon","ebay","cnn","megaco","redis","pando","vhua","telegram",\
+"vevo","pandora","quic","whatsapp_voice","dpi_check"
 #endif
 
 #ifndef NDPI_LAST_NFPROTO
-#define NDPI_LAST_NFPROTO NDPI_LAST_IMPLEMENTED_PROTOCOL
+#define NDPI_LAST_NFPROTO NDPI_LAST_IMPLEMENTED_PROTOCOL + 1
 #endif
 
 #endif /* _LINUX_NETFILTER_XT_NDPI_H */

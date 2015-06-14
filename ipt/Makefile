@@ -2,7 +2,7 @@ NDPI_PATH2 := ${NDPI_PATH}/src
 NDPI_SRC := ndpi_cpy
 NDPI_PRO := ${NDPI_SRC}/lib/protocols
 
-CFLAGS = -fPIC -I${NDPI_SRC}/include -I${NDPI_SRC}/lib -I../src -DOPENDPI_NETFILTER_MODULE -O2 -Wall
+CFLAGS = -fPIC -I${NDPI_SRC}/include -I${NDPI_SRC}/lib -I../src -DOPENDPI_NETFILTER_MODULE -O2 -Wall -DNDPI_IPTABLES_EXT
 
 all:
 	if test -d ${NDPI_SRC}; then \

@@ -31,9 +31,6 @@ Location:
    -> Core Netfilter Configuration
     -> Netfilter connection tracking support
 
-- If your kernel version is 2.6.31 or greater, then you should DISABLE
-  Netfilter conntrack for the Netlink protocol.
-
 In kernel 2.6.34 or greater its defined as:
 
 Connection tracking netlink interface
