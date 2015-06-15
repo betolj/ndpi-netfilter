@@ -406,9 +406,9 @@ ndpi_process_packet(struct nf_conn * ct, const uint64_t time,
         spin_unlock_bh (&flow_lock);
         if (flow == NULL){
                 flow = ndpi_alloc_flow(ct);
-                flow->detection_completed = 0;
                 if (flow == NULL)
                         return proto;
+                else flow->detection_completed = 0;
         }
         if (flow->detection_completed && (flow->detected_protocol != NDPI_PROTOCOL_UNKNOWN)) {
                 return flow->detected_protocol;
