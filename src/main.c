@@ -329,12 +329,8 @@ ndpi_enable_protocols (const struct xt_ndpi_mtinfo*info)
 
 			//Force http (7) or ssl (91) detection for webserver host requests
                         if ((i > 118 && i < 127) || (i > 139 && i < 146) || (i > 175 && i < 182 ) || i == 70 || i == 133) {
-                           atomic_inc(&protocols_cnt[6]);
                            NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, 7);
-                           ndpi_set_protocol_detection_bitmask2 (ndpi_struct,&protocols_bitmask);
-                           atomic_inc(&protocols_cnt[90]);
                            NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, 91);
-                           ndpi_set_protocol_detection_bitmask2 (ndpi_struct,&protocols_bitmask);
                         }
 
                         atomic_inc(&protocols_cnt[i-1]);
