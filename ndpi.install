@@ -45,3 +45,4 @@ iptables -A OUTPUT -m ndpi --facebook -j DROP
 - Or make a manual flow detection
 iptables -A INPUT -m ndpi --ftp -j DROP
 iptables -A OUTPUT -m ndpi --ftp -j DROP
+
