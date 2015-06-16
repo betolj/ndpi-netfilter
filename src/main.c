@@ -37,7 +37,6 @@
 #include <linux/time.h>
 
 #include <net/netfilter/nf_conntrack.h>
-#include <net/netfilter/nf_conntrack_extend.h>
 #include <net/netfilter/nf_conntrack_ecache.h>
 
 #include "ndpi_main.h"
@@ -77,6 +76,7 @@ static struct kmem_cache *osdpi_id_cache __read_mostly;
 
 static NDPI_PROTOCOL_BITMASK protocols_bitmask;
 static atomic_t protocols_cnt[NDPI_LAST_IMPLEMENTED_PROTOCOL];
+static u8 nfndpi_protocols_http[NDPI_LAST_IMPLEMENTED_PROTOCOL];
 
 DEFINE_SPINLOCK(flow_lock);
 DEFINE_SPINLOCK(id_lock);
@@ -143,30 +143,6 @@ ndpi_flow_search(struct rb_root *root, struct nf_conn *ct)
 	}
 
 	return NULL;
-}
-
-
-static void ndpi_flow_gc(void)
-{
-        struct rb_node * next;
-        struct osdpi_flow_node *flow;
-
-        u64 t1;
-        struct timeval tv;
-
-        spin_lock_bh (&flow_lock);
-        do_gettimeofday(&tv);
-        t1 = (uint64_t) tv.tv_sec;
-        next = rb_first(&osdpi_flow_root);
-        while (next){
-                flow = rb_entry(next, struct osdpi_flow_node, node);
-                next = rb_next(&flow->node);
-                if (t1 - flow->conn_timeout > 180) {
-                    rb_erase(&flow->node, &osdpi_flow_root);
-                    kmem_cache_free (osdpi_flow_cache, flow);
-                }
-        }
-        spin_unlock_bh (&flow_lock);
 }
 
 
@@ -282,7 +258,7 @@ ndpi_alloc_flow (struct nf_conn * ct)
 
 
 static void
-ndpi_free_flow (struct nf_conn * ct)
+nfndpi_free_flow (struct nf_conn * ct)
 {
         struct osdpi_flow_node * flow;
 
@@ -326,7 +302,7 @@ ndpi_alloc_id (union nf_inet_addr * ip)
 
 
 static void
-ndpi_free_id (union nf_inet_addr * ip)
+nfndpi_free_id (union nf_inet_addr * ip)
 {
         struct osdpi_id_node *id;
 
@@ -344,9 +320,41 @@ static void kill_dpimaps(struct nf_conn * ct) {
         src = &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.src.u3;
         dst = &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.u3;
 
-        ndpi_free_id (src);
-        ndpi_free_id (dst);
-        ndpi_free_flow (ct);
+        nfndpi_free_id (src);
+        nfndpi_free_id (dst);
+        nfndpi_free_flow (ct);
+}
+
+
+static void ndpi_flow_gc(void)
+{
+	struct nf_conn * ct;
+        struct rb_node * next;
+        struct osdpi_flow_node *flow;
+        union nf_inet_addr *src, *dst;
+
+        u64 t1;
+        struct timeval tv;
+
+        spin_lock_bh (&flow_lock);
+        do_gettimeofday(&tv);
+        t1 = (uint64_t) tv.tv_sec;
+        next = rb_first(&osdpi_flow_root);
+        while (next){
+                flow = rb_entry(next, struct osdpi_flow_node, node);
+                next = rb_next(&flow->node);
+                if (t1 - flow->conn_timeout > 180) {
+                    ct = flow->ct;
+                    src = &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.src.u3;
+                    dst = &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.u3;
+		    if (src) nfndpi_free_id (src);
+		    if (dst) nfndpi_free_id (dst);
+
+                    rb_erase(&flow->node, &osdpi_flow_root);
+                    kmem_cache_free (osdpi_flow_cache, flow);
+                }
+        }
+        spin_unlock_bh (&flow_lock);
 }
 
 
@@ -360,7 +368,7 @@ ndpi_enable_protocols (const struct xt_ndpi_mtinfo*info)
                         spin_lock_bh (&ipq_lock);
 
 			//Force http (7) or ssl (91) detection for webserver host requests
-                        if ((i > 118 && i < 127) || (i > 139 && i < 146) || (i > 175 && i < 182 ) || i == 70 || i == 133) {
+                        if (nfndpi_protocols_http[i]) {
                            NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, 7);
                            NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, 91);
                         }
@@ -394,25 +402,6 @@ ndpi_disable_protocols (const struct xt_ndpi_mtinfo*info)
 }
 
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
-static int
-ndpi_conntrack_event(struct notifier_block *this, unsigned long events, void *item)
-{
-        struct nf_conn * ct = (struct nf_conn *) item;
-        if (ct == &nf_conntrack_untracked)
-                return NOTIFY_DONE;
-
-        if (events & IPCT_DESTROY) kill_dpimaps(ct);
-        return NOTIFY_DONE;
-}
-
-static struct notifier_block
-osdpi_notifier = {
-        .notifier_call = ndpi_conntrack_event,
-};
-#endif
-
-
 static u32
 ndpi_process_packet(struct nf_conn * ct, const uint64_t time,
                        const struct iphdr *iph, uint16_t ipsize)
@@ -425,7 +414,6 @@ ndpi_process_packet(struct nf_conn * ct, const uint64_t time,
         u64 t1;
         struct timeval tv;
 
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,28)
 	enum tcp_bit_set {
 	        TCP_SYN_SET,
 	        TCP_SYNACK_SET,
@@ -442,7 +430,6 @@ ndpi_process_packet(struct nf_conn * ct, const uint64_t time,
            spin_unlock_bh (&ipq_lock);
            return proto;
         }
-#endif
 
         spin_lock_bh (&flow_lock);
         flow = ndpi_flow_search (&osdpi_flow_root, ct);
@@ -453,9 +440,7 @@ ndpi_process_packet(struct nf_conn * ct, const uint64_t time,
 
 	// Flow control
         if (flow == NULL){
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,28)
-                ndpi_flow_gc;
-#endif
+                ndpi_flow_gc();
                 flow = ndpi_alloc_flow(ct);
                 if (flow == NULL) return proto;
                 else {
@@ -471,12 +456,10 @@ ndpi_process_packet(struct nf_conn * ct, const uint64_t time,
 			flow->ndpi_timeout = t1;
 			return flow->detected_protocol;
 	        }
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,28)
 	        else if (t1 - flow->ndpi_timeout >= 30) {
 		        flow->conn_timeout = t1;
 			return NDPI_PROTOCOL_UNKNOWN;
 	        }
-#endif
 	}
 
         ipsrc = &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.src.u3;
@@ -687,10 +670,6 @@ static void ndpi_cleanup(void)
 
         ndpi_exit_detection_module(ndpi_struct, free_wrapper);
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
-        nf_conntrack_unregister_notifier (&osdpi_notifier);
-#endif
-        
         /* free all objects before destroying caches */
         next = rb_first(&osdpi_flow_root);
         while (next){
@@ -743,8 +722,12 @@ static int __init ndpi_mt_init(void)
                 goto err_out;
 	}
         
-        for (i = 0; i <= NDPI_LAST_IMPLEMENTED_PROTOCOL; i++){
+        for (i = 0; i < NDPI_LAST_IMPLEMENTED_PROTOCOL; i++){
                 atomic_set (&protocols_cnt[i], 0);
+
+                // Set HTTP based protocols
+                if ((i > 118 && i < 127) || (i > 139 && i < 146) || (i > 175 && i < 182 ) || i == 70 || i == 133) nfndpi_protocols_http[i]=1;
+                else nfndpi_protocols_http[i]=0;
         }
 
 	/* disable all protocols */
@@ -776,14 +759,6 @@ static int __init ndpi_mt_init(void)
                 goto err_flow;
         }
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
-        ret = nf_conntrack_register_notifier(&osdpi_notifier);
-        if (ret < 0){
-                pr_err("xt_ndpi: error registering notifier.\n");
-                goto err_id;
-        }
-#endif
-
         ret = xt_register_match(&ndpi_mt_reg);
         if (ret != 0){
                 pr_err("xt_ndpi: error registering ndpi match.\n");
@@ -792,8 +767,6 @@ static int __init ndpi_mt_init(void)
 
         return ret;
 
-err_id:
-        kmem_cache_destroy (osdpi_id_cache);
 err_flow:
         kmem_cache_destroy (osdpi_flow_cache);
 err_ipq:
