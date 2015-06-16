@@ -153,9 +153,10 @@ static void ndpi_flow_gc(void)
 
         u64 t1;
         struct timeval tv;
-        t1 = (uint64_t) tv.tv_sec;
 
         spin_lock_bh (&flow_lock);
+        do_gettimeofday(&tv);
+        t1 = (uint64_t) tv.tv_sec;
         next = rb_first(&osdpi_flow_root);
         while (next){
                 flow = rb_entry(next, struct osdpi_flow_node, node);
