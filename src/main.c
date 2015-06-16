@@ -775,7 +775,7 @@ static int __init ndpi_mt_init(void)
                 goto err_flow;
         }
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,2,0)        
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
         ret = nf_conntrack_register_notifier(&osdpi_notifier);
         if (ret < 0){
                 pr_err("xt_ndpi: error registering notifier.\n");
