@@ -8,33 +8,28 @@
 apt-get install linux-source
 
 
-2. Install nDPI
+# With Build dir /usr/src/ndpi-netfilter
+2. Install nDPI and ndpi-netfilter
 apt-get install libtool
 apt-get install autoconf
 apt-get install pkg-config
 apt-get install subversion
-cd /usr/src
-svn co https://github.com/ntop/nDPI
-mv nDPI nDPI-dev
-mv nDPI-dev/trunk nDPI
+apt-get install iptables-dev 
+cd /usr/src/ndpi-netfilter
+tar xvfz tar xvfz nDPI.tar.gz
 cd nDPI
 ./autogen.sh
 #./configure –with-pic
 make
 make install
 
-
-3. ndpi-netfilter
-apt-get install iptables-dev 
-cd /usr/src/
-#tar xvf ndpi-netfilter.patch.tar.gz
-cd ndpi-netfilter
-NDPI_PATH=/usr/src/nDPI make
+cd ..
+NDPI_PATH=/usr/src/ndpi-netfilter/nDPI make
 make modules_install
 cp /usr/src/ndpi-netfilter/ipt/libxt_ndpi.so /lib/xtables/
 
 
-4. Firewall rules example
+3. Firewall rules example
 - You can use a full detection engine with "--dpi_check" option (any flows):
 # dpi_check without a firewall target
 iptables -t mangle -A PREROUTING -m ndpi --dpi_check
