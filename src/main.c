@@ -43,17 +43,12 @@
 #include "ndpi_main.h"
 #include "xt_ndpi.h"
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,2,0)
-#include <linux/netfilter/nfnetlink.h>
-static const struct nfnetlink_subsystem xt_ndpi_nfnetlink = {
-        .name           = "ndpi",
-};
-#endif
-
 /* flow tracking */
 struct osdpi_flow_node {
         struct rb_node node;
         struct nf_conn * ct;
+        u64 ndpi_timeout;  // detection timeout - 30s
+        u64 conn_timeout;  // connection timeout - 180s
         u8 detection_completed;
 	/* result only, not used for flow identification */
 	u32 detected_protocol;
@@ -142,11 +137,35 @@ ndpi_flow_search(struct rb_root *root, struct nf_conn *ct)
   			node = node->rb_left;
 		else if (ct > data->ct)
   			node = node->rb_right;
-		else
+		else {
   			return data;
+                 }
 	}
 
 	return NULL;
+}
+
+
+static void ndpi_flow_gc(void)
+{
+        struct rb_node * next;
+        struct osdpi_flow_node *flow;
+
+        u64 t1;
+        struct timeval tv;
+        t1 = (uint64_t) tv.tv_sec;
+
+        spin_lock_bh (&flow_lock);
+        next = rb_first(&osdpi_flow_root);
+        while (next){
+                flow = rb_entry(next, struct osdpi_flow_node, node);
+                next = rb_next(&flow->node);
+                if (t1 - flow->conn_timeout > 180) {
+                    rb_erase(&flow->node, &osdpi_flow_root);
+                    kmem_cache_free (osdpi_flow_cache, flow);
+                }
+        }
+        spin_unlock_bh (&flow_lock);
 }
 
 
@@ -318,6 +337,18 @@ ndpi_free_id (union nf_inet_addr * ip)
 }
 
 
+static void kill_dpimaps(struct nf_conn * ct) {
+        union nf_inet_addr *src, *dst;
+
+        src = &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.src.u3;
+        dst = &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.u3;
+
+        ndpi_free_id (src);
+        ndpi_free_id (dst);
+        ndpi_free_flow (ct);
+}
+
+
 static void
 ndpi_enable_protocols (const struct xt_ndpi_mtinfo*info)
 {
@@ -362,27 +393,15 @@ ndpi_disable_protocols (const struct xt_ndpi_mtinfo*info)
 }
 
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
 static int
 ndpi_conntrack_event(struct notifier_block *this, unsigned long events, void *item)
 {
         struct nf_conn * ct = (struct nf_conn *) item;
-        union nf_inet_addr *src, *dst;
-
         if (ct == &nf_conntrack_untracked)
                 return NOTIFY_DONE;
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
-        if (events & IPCT_DESTROY){
-#else
-        if (events & (1 << IPCT_DESTROY)){
-#endif
-             src = &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.src.u3;
-             dst = &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.u3;
-
-             ndpi_free_id (src);
-             ndpi_free_id (dst);
-             ndpi_free_flow (ct);
-        }
+        if (events & IPCT_DESTROY) kill_dpimaps(ct);
         return NOTIFY_DONE;
 }
 
@@ -390,6 +409,7 @@ static struct notifier_block
 osdpi_notifier = {
         .notifier_call = ndpi_conntrack_event,
 };
+#endif
 
 
 static u32
@@ -401,18 +421,62 @@ ndpi_process_packet(struct nf_conn * ct, const uint64_t time,
         struct osdpi_id_node *src, *dst;
         struct osdpi_flow_node * flow;
 
+        u64 t1;
+        struct timeval tv;
+
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,28)
+	enum tcp_bit_set {
+	        TCP_SYN_SET,
+	        TCP_SYNACK_SET,
+	        TCP_FIN_SET,
+	        TCP_ACK_SET,
+	        TCP_RST_SET,
+	        TCP_NONE_SET,
+	};
+        if (((ct->proto.tcp.seen[0].flags | ct->proto.tcp.seen[1].flags)
+                     & IP_CT_TCP_FLAG_CLOSE_INIT) || ct->proto.tcp.last_index == TCP_RST_SET) {
+
+           spin_lock_bh (&ipq_lock);
+	   kill_dpimaps(ct);
+           spin_unlock_bh (&ipq_lock);
+           return proto;
+        }
+#endif
+
         spin_lock_bh (&flow_lock);
         flow = ndpi_flow_search (&osdpi_flow_root, ct);
+        do_gettimeofday(&tv);
         spin_unlock_bh (&flow_lock);
+
+        t1 = (uint64_t) tv.tv_sec;
+
+	// Flow control
         if (flow == NULL){
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,28)
+                ndpi_flow_gc;
+#endif
                 flow = ndpi_alloc_flow(ct);
-                if (flow == NULL)
-                        return proto;
-                else flow->detection_completed = 0;
+                if (flow == NULL) return proto;
+                else {
+                    // Include flow timeouts
+                    flow->ndpi_timeout = t1; // 30s for DPI timeout
+                    flow->conn_timeout = t1; // 180s for connection timeout
+                }
         }
-        if (flow->detection_completed && (flow->detected_protocol != NDPI_PROTOCOL_UNKNOWN)) {
-                return flow->detected_protocol;
-        }
+        else {
+		// Update timeouts
+	        if (flow->detection_completed) {
+		        flow->conn_timeout = t1;
+			flow->ndpi_timeout = t1;
+			return flow->detected_protocol;
+	        }
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,28)
+	        else if (t1 - flow->ndpi_timeout >= 30) {
+		        flow->conn_timeout = t1;
+			return NDPI_PROTOCOL_UNKNOWN;
+	        }
+#endif
+	}
 
         ipsrc = &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.src.u3;
 
@@ -444,8 +508,10 @@ ndpi_process_packet(struct nf_conn * ct, const uint64_t time,
         flow->detection_completed = 0;
         flow->detected_protocol = proto;
         if (flow->detected_protocol != NDPI_PROTOCOL_UNKNOWN) {
-                flow->detection_completed = 1;
+           flow->conn_timeout = t1;
+           flow->detection_completed = 1;
         }
+
         spin_unlock_bh (&ipq_lock);
 
 	return proto;
@@ -620,11 +686,8 @@ static void ndpi_cleanup(void)
 
         ndpi_exit_detection_module(ndpi_struct, free_wrapper);
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,2,0)         
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,28)
         nf_conntrack_unregister_notifier (&osdpi_notifier);
-#else
-        nfnetlink_subsys_unregister(&xt_ndpi_nfnetlink);
-        netlink_unregister_notifier(&osdpi_notifier);
 #endif
         
         /* free all objects before destroying caches */
@@ -667,8 +730,7 @@ ndpi_mt_reg __read_mostly = {
 
 static int __init ndpi_mt_init(void)
 {
-        int ret, i;
-        int status = -EINVAL;
+        int ret=-ENOMEM, i;
 
 	pr_info("xt_ndpi 2.0 (nDPI wrapper module).\n");
 	/* init global detection structure */
@@ -719,16 +781,8 @@ static int __init ndpi_mt_init(void)
                 pr_err("xt_ndpi: error registering notifier.\n");
                 goto err_id;
         }
-#else
-        //Try osdpi_notifier into netlink
-        status = nfnetlink_subsys_register(&xt_ndpi_nfnetlink);
-        if (status < 0) {
-                printk(KERN_ERR "xt_ndpi: failed to create netlink socket\n");
-                goto err_id;
-        }
-        else netlink_register_notifier(&osdpi_notifier);
-        ret = status;
 #endif
+
         ret = xt_register_match(&ndpi_mt_reg);
         if (ret != 0){
                 pr_err("xt_ndpi: error registering ndpi match.\n");
