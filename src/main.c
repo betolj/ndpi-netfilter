@@ -65,6 +65,7 @@ struct osdpi_id_node {
 };
 
 
+u64 gc_interval_timeout = 0;
 static u32 size_id_struct = 0;
 static u32 size_flow_struct = 0;
 
@@ -343,7 +344,7 @@ static void ndpi_flow_gc(void)
         while (next){
                 flow = rb_entry(next, struct osdpi_flow_node, node);
                 next = rb_next(&flow->node);
-                if (t1 - flow->conn_timeout > 180) {
+		if (t1 - flow->conn_timeout > 180) {
                     ct = flow->ct;
                     src = &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.src.u3;
                     dst = &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.u3;
@@ -352,7 +353,7 @@ static void ndpi_flow_gc(void)
 
                     rb_erase(&flow->node, &osdpi_flow_root);
                     kmem_cache_free (osdpi_flow_cache, flow);
-                }
+		}
         }
         spin_unlock_bh (&flow_lock);
 }
@@ -367,17 +368,19 @@ ndpi_enable_protocols (const struct xt_ndpi_mtinfo*info)
                 if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(info->flags, i) != 0){
                         spin_lock_bh (&ipq_lock);
 
-			//Force http (7) or ssl (91) detection for webserver host requests
+			//Force http or ssl detection for webserver host requests
                         if (nfndpi_protocols_http[i]) {
-                           NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, 7);
-                           NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, 91);
+				NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, NDPI_PROTOCOL_HTTP);
+			        ndpi_set_protocol_detection_bitmask2 (ndpi_struct,&protocols_bitmask);
+				NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, NDPI_PROTOCOL_SSL);
+			        ndpi_set_protocol_detection_bitmask2 (ndpi_struct,&protocols_bitmask);
                         }
+			atomic_inc(&protocols_cnt[i-1]);
+			NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, i);
+			ndpi_set_protocol_detection_bitmask2
+	                        (ndpi_struct,&protocols_bitmask);
 
-                        atomic_inc(&protocols_cnt[i-1]);
-                        NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, i);
-                        ndpi_set_protocol_detection_bitmask2
-                                (ndpi_struct,&protocols_bitmask);
-                        spin_unlock_bh (&ipq_lock);
+			spin_unlock_bh (&ipq_lock);
                 }
         }
 }
@@ -433,14 +436,20 @@ ndpi_process_packet(struct nf_conn * ct, const uint64_t time,
 
         spin_lock_bh (&flow_lock);
         flow = ndpi_flow_search (&osdpi_flow_root, ct);
-        do_gettimeofday(&tv);
         spin_unlock_bh (&flow_lock);
 
+        do_gettimeofday(&tv);
         t1 = (uint64_t) tv.tv_sec;
 
 	// Flow control
         if (flow == NULL){
-                ndpi_flow_gc();
+               if (!gc_interval_timeout) gc_interval_timeout = t1;
+                else {
+                    if (t1 - gc_interval_timeout > 59) {
+                        ndpi_flow_gc();
+                        gc_interval_timeout = t1;
+                    }
+                }
                 flow = ndpi_alloc_flow(ct);
                 if (flow == NULL) return proto;
                 else {
@@ -451,13 +460,12 @@ ndpi_process_packet(struct nf_conn * ct, const uint64_t time,
         }
         else {
 		// Update timeouts
+	        flow->conn_timeout = t1;
 	        if (flow->detection_completed) {
-		        flow->conn_timeout = t1;
 			flow->ndpi_timeout = t1;
 			return flow->detected_protocol;
 	        }
 	        else if (t1 - flow->ndpi_timeout >= 30) {
-		        flow->conn_timeout = t1;
 			return NDPI_PROTOCOL_UNKNOWN;
 	        }
 	}
