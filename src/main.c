@@ -371,7 +371,9 @@ ndpi_enable_protocols (const struct xt_ndpi_mtinfo*info)
 			//Force http or ssl detection for webserver host requests
                         if (nfndpi_protocols_http[i]) {
 				NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, NDPI_PROTOCOL_HTTP);
+			        ndpi_set_protocol_detection_bitmask2 (ndpi_struct,&protocols_bitmask);
 				NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, NDPI_PROTOCOL_SSL);
+			        ndpi_set_protocol_detection_bitmask2 (ndpi_struct,&protocols_bitmask);
                         }
 			atomic_inc(&protocols_cnt[i-1]);
 			NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, i);
