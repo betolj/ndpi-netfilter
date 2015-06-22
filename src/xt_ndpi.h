@@ -27,6 +27,10 @@
 #include <linux/netfilter.h>
 #include "ndpi_main.h"
 
+#ifndef NDPI_BITMASK_IS_ZERO
+#define NDPI_BITMASK_IS_ZERO(a) NDPI_BITMASK_IS_EMPTY(a)
+#endif
+
 struct xt_ndpi_mtinfo {
         NDPI_PROTOCOL_BITMASK flags;
 };
