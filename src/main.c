@@ -46,8 +46,8 @@
 struct osdpi_flow_node {
         struct rb_node node;
         struct nf_conn * ct;
-        /* mark if done detecting flow proto - no more tries */
         u_int64_t ndpi_timeout;  // detection timeout - detection 30s / connection 180s
+        /* mark if done detecting flow proto - no more tries */
         u8 detection_completed;
 	/* result only, not used for flow identification */
 	u32 detected_protocol;
@@ -622,7 +622,7 @@ ndpi_mt(const struct sk_buff *skb, struct xt_action_param *par)
 	time = ((uint64_t) tv.tv_sec) * detection_tick_resolution +
 		tv.tv_usec / (1000000 / detection_tick_resolution);
 
-	/* reset for new packets and solve ct race conditions */
+	/* reset for new packets and solve ct collisions */
 	if (ctinfo == IP_CT_NEW)
 		ndpi_kill_flow(ct, &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.src.u3, &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.u3);
 
