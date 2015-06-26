@@ -5,7 +5,7 @@ NDPI_PRO := ${NDPI_SRC}/lib/protocols
 ccflags-y += -I${src}/${NDPI_SRC}/include -I${src}/${NDPI_SRC}/lib -DOPENDPI_NETFILTER_MODULE -DNDPI_IPTABLES_EXT
 
 MODULES_DIR := /lib/modules/$(shell uname -r)
-KERNEL_DIR := ${MODULES_DIR}/build
+KERNEL_DIR ?= ${MODULES_DIR}/build
 
 obj-m := xt_ndpi.o
 xt_ndpi-y := main.o \
