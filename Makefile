@@ -1,4 +1,7 @@
 all:
+ifeq ($(strip $(NDPI_PATH)),)
+	$(error NDPI_PATH required)
+endif
 	$(MAKE) -C ipt
 	$(MAKE) -C src
 modules_install:
