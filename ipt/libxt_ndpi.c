@@ -75,7 +75,6 @@ ndpi_mt4_parse(int c, char **argv, int invert, unsigned int *flags,
                 *flags = 1;
                 return true;
         }
-
         *flags = 0;
 	return false;
 }
