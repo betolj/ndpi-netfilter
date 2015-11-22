@@ -69,19 +69,14 @@ ndpi_mt4_parse(int c, char **argv, int invert, unsigned int *flags,
                   const void *entry, struct xt_entry_match **match)
 {
 	struct xt_ndpi_mtinfo *info = (void *)(*match)->data;
-        int i;
 
-        *flags = 0;
-        for (i = 1; i <= NDPI_LAST_NFPROTO; i++){
-                if (c == i){
-                        NDPI_ADD_PROTOCOL_TO_BITMASK(info->flags, i);
-                        /*printf("Parameter detected as protocol %s.\n",
-                          prot_long_str[i]);*/
-                        *flags = 1;
-                        return true;
-                }
+        if (c >= 0 && c <= NDPI_LAST_IMPLEMENTED_PROTOCOL) {
+                NDPI_ADD_PROTOCOL_TO_BITMASK(info->flags, c);
+                *flags = 1;
+                return true;
         }
 
+        *flags = 0;
 	return false;
 }
 
