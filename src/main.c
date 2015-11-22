@@ -784,7 +784,7 @@ static int __init ndpi_mt_init(void)
                 goto err_out;
 	}
 
-        for (i = 0; i < NDPI_LAST_IMPLEMENTED_PROTOCOL; i++){
+        for (i = 0; i <= NDPI_LAST_IMPLEMENTED_PROTOCOL; i++){
                 atomic_set (&protocols_cnt[i], 0);
 
                 // Set HTTP based protocols
