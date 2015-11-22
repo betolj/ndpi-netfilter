@@ -88,6 +88,13 @@ xt_ndpi-y := main.o \
                 ${NDPI_PRO}/qq.o \
                 ${NDPI_PRO}/quake.o \
                 ${NDPI_PRO}/quic.o \
+                ${NDPI_PRO}/eaq.o \
+                ${NDPI_PRO}/kakaotalk_voice.o \
+                ${NDPI_PRO}/mpegts.o \
+                ${NDPI_PRO}/starcraft.o \
+                ${NDPI_PRO}/teredo.o \
+                ${NDPI_PRO}/hep.o \
+                ${NDPI_PRO}/ubntac2.o \
                 ${NDPI_PRO}/radius.o \
                 ${NDPI_PRO}/rdp.o \
                 ${NDPI_PRO}/rtp.o \
@@ -152,6 +159,7 @@ all:
 		mkdir ${NDPI_SRC}; \
 		cp ${NDPI_PATH2}/* ${NDPI_SRC} -R; \
 	fi
+	cp ${NDPI_SRC}/../../nDPI-patch/src/* ${NDPI_SRC}/ -R;
 	cp ${NDPI_SRC}/lib/third_party/src/*.c ${NDPI_SRC}/lib -R;
 	cp ${NDPI_SRC}/lib/third_party/include/*.h ${NDPI_SRC}/lib -R;
 	cp ${NDPI_SRC}/lib/third_party/include/*.h ${NDPI_SRC}/include -R;

@@ -41,7 +41,6 @@
 #include "ndpi_main.h"
 #include "xt_ndpi.h"
 
-
 /* flow tracking */
 struct osdpi_flow_node {
         struct rb_node node;
@@ -50,7 +49,7 @@ struct osdpi_flow_node {
         /* mark if done detecting flow proto - no more tries */
         u8 detection_completed;
 	/* result only, not used for flow identification */
-	u32 detected_protocol;
+        ndpi_protocol detected_protocol;
         /* last pointer assigned at run time */
 	struct ndpi_flow_struct *ndpi_flow;
 };
@@ -324,10 +323,11 @@ ndpi_enable_protocols (const struct xt_ndpi_mtinfo*info)
 
 			//Force http or ssl detection for webserver host requests
                         if (nfndpi_protocols_http[i]) {
-				NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, NDPI_PROTOCOL_DNS);
-				NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, NDPI_PROTOCOL_HTTP);
+			        NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, NDPI_PROTOCOL_DNS);
+				NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, NDPI_PROTOCOL_HTTP); 
 				NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, NDPI_PROTOCOL_SSL);
-                        }
+			}
+
 			atomic_inc(&protocols_cnt[i-1]);
 			NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, i);
 			ndpi_set_protocol_detection_bitmask2
@@ -462,21 +462,21 @@ ndpi_process_packet(struct nf_conn * ct, const uint64_t time,
                 else {
 			/* Include flow timeouts */
 			flow->ndpi_timeout = t1;  // 30s for DPI timeout  and 180 for connection
-		        flow->detected_protocol = NDPI_PROTOCOL_UNKNOWN;
+		        flow->detected_protocol.protocol = NDPI_PROTOCOL_UNKNOWN;
 			flow->detection_completed = 0;
                 }
         }
         else {
 		/* Update timeouts */
 		exist_flow=1;
-		if (flow->detected_protocol) {
-			proto = flow->detected_protocol;
+		if (flow->detected_protocol.protocol) {
+			proto = flow->detected_protocol.protocol;
 			flow->ndpi_timeout = t1;
 			//pr_info ("xt_ndpi: flow detected. %d\n", flow->detected_protocol);
 			spin_unlock_bh (&flow_lock);
 			return proto;
 	        }
-	        else if (!flow->detected_protocol && (t1 - flow->ndpi_timeout > 30)) {
+	        else if (!flow->detected_protocol.protocol && (t1 - flow->ndpi_timeout > 30)) {
 			//pr_info ("xt_ndpi: expired.\n");
 			spin_unlock_bh (&flow_lock);
 			return NDPI_PROTOCOL_UNKNOWN;
@@ -520,27 +520,23 @@ ndpi_process_packet(struct nf_conn * ct, const uint64_t time,
 
         /* here the actual detection is performed */
         spin_lock_bh (&ipq_lock);
-        proto = ndpi_detection_process_packet(ndpi_struct,flow->ndpi_flow,
+        flow->detected_protocol = ndpi_detection_process_packet(ndpi_struct,flow->ndpi_flow,
                                                 (uint8_t *) iph, ipsize, time,
                                                 src->ndpi_id, dst->ndpi_id);
 
 	/* set detected protocol */
-        flow->detected_protocol = proto;
+	proto = flow->detected_protocol.protocol;
         if (proto > NDPI_LAST_IMPLEMENTED_PROTOCOL)
                 proto = NDPI_PROTOCOL_UNKNOWN;
 	else {
-	        if (flow->detected_protocol != NDPI_PROTOCOL_UNKNOWN) {
+	        if (flow->detected_protocol.protocol != NDPI_PROTOCOL_UNKNOWN) {
 			//pr_info ("xt_ndpi: proto detected. %d\n", flow->detected_protocol);
-			if (flow->ndpi_flow->no_cache_protocol)
-				ndpi_kill_flow(ct, ipsrc, ipdst);
-			else {
-				/* update timeouts */
-				flow->ndpi_timeout = t1;
-				flow->detection_completed = 1;
+			/* update timeouts */
+			flow->ndpi_timeout = t1;
+			flow->detection_completed = 1;
 
-				/* reset detection */
-				if (flow->ndpi_flow) memset(flow->ndpi_flow, 0, sizeof(*(flow->ndpi_flow)));
-			}
+			/* reset detection */
+			if (flow->ndpi_flow) memset(flow->ndpi_flow, 0, sizeof(*(flow->ndpi_flow)));
 	        }
 	}
         spin_unlock_bh (&ipq_lock);
@@ -775,6 +771,7 @@ static int __init ndpi_mt_init(void)
 	pr_info("xt_ndpi 2.0 (nDPI wrapper module).\n");
 
 	/* init global detection structure */
+	NDPI_PROTOCOL_BITMASK all;
 	ndpi_struct = ndpi_init_detection_module(detection_tick_resolution,
                                                      malloc_wrapper, free_wrapper, debug_printf);
 
@@ -788,17 +785,17 @@ static int __init ndpi_mt_init(void)
                 atomic_set (&protocols_cnt[i], 0);
 
                 // Set HTTP based protocols
-                if ((i > 118 && i < 127) || (i > 139 && i < 146) || (i > 175 && i < 182 ) || i == 70 || i == 133) nfndpi_protocols_http[i]=1;
+                if ((i > 118 && i < 127) || (i > 139 && i < 146) || (i > 175 && i <= 218 ) || i == 70 || i == 133) nfndpi_protocols_http[i]=1;
                 else nfndpi_protocols_http[i]=0;
         }
 
 	/* disable all protocols */
 	NDPI_BITMASK_RESET(protocols_bitmask);
 	ndpi_set_protocol_detection_bitmask2(ndpi_struct, &protocols_bitmask);
-        
+
 	/* allocate memory for id and flow tracking */
-	size_id_struct = ndpi_detection_get_sizeof_ndpi_id_struct();
-	size_flow_struct = ndpi_detection_get_sizeof_ndpi_flow_struct();
+        size_id_struct = sizeof(struct ndpi_id_struct);
+        size_flow_struct = sizeof(struct ndpi_flow_struct);
 
 
         osdpi_flow_cache = kmem_cache_create("xt_ndpi_flows",
