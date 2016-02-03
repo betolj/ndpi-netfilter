@@ -43,7 +43,7 @@ ndpi_mt4_save(const void *entry, const struct xt_entry_match *match)
 
         for (i = 1; i <= NDPI_LAST_NFPROTO; i++){
                 if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(info->flags, i) != 0){
-                        printf("--%s ", prot_short_str[i]);
+                        printf(" --%s ", prot_short_str[i]);
                 }
         }
 }
