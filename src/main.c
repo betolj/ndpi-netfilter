@@ -315,24 +315,25 @@ nfndpi_free_id (union nf_inet_addr * ip)
 static void
 ndpi_enable_protocols (const struct xt_ndpi_mtinfo*info)
 {
-        int i;
+        int i=0;
 
         for (i = 1; i <= NDPI_LAST_IMPLEMENTED_PROTOCOL; i++){
-                if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(info->flags, i) != 0){
-		        spin_lock_bh (&ipq_lock);
+	        if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(info->flags, i) != 0){
+			spin_lock_bh (&ipq_lock);
 
-			//Force http or ssl detection for webserver host requests
-                        if (nfndpi_protocols_http[i]) {
-			        NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, NDPI_PROTOCOL_DNS);
-				NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, NDPI_PROTOCOL_HTTP); 
-				NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, NDPI_PROTOCOL_SSL);
+		        if (ndpi_struct->proto_defaults[i].protoIdx == 0){
+				//Force http or ssl detection for webserver host requests
+	                        if (nfndpi_protocols_http[i]) {
+					 NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, NDPI_PROTOCOL_DNS);
+					 NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, NDPI_PROTOCOL_HTTP);
+				 	 NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, NDPI_PROTOCOL_SSL);
+				}
+
+				atomic_inc(&protocols_cnt[i-1]);
+				NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, i);
+				ndpi_set_protocol_detection_bitmask2
+		                        (ndpi_struct,&protocols_bitmask);
 			}
-
-			atomic_inc(&protocols_cnt[i-1]);
-			NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, i);
-			ndpi_set_protocol_detection_bitmask2
-	                        (ndpi_struct,&protocols_bitmask);
-
 			spin_unlock_bh (&ipq_lock);
                 }
         }
@@ -655,6 +656,7 @@ ndpi_mt_check(const char *tablename,
                 return -EINVAL;
         }
 
+	NDPI_BITMASK_RESET(protocols_bitmask);
         ndpi_enable_protocols (info);
 
 	return nf_ct_l3proto_try_module_get (match->family) == 0;
@@ -671,6 +673,7 @@ ndpi_mt_check(const struct xt_mtchk_param *par)
                 return -EINVAL;
         }
 
+	NDPI_BITMASK_RESET(protocols_bitmask);
         ndpi_enable_protocols (info);
 
 	return nf_ct_l3proto_try_module_get (par->family) == 0;
@@ -686,6 +689,7 @@ ndpi_mt_check(const struct xt_mtchk_param *par)
                 return -EINVAL;
         }
 
+	NDPI_BITMASK_RESET(protocols_bitmask);
         ndpi_enable_protocols (info);
 
 	return nf_ct_l3proto_try_module_get (par->family);
