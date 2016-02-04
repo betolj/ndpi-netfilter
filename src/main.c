@@ -324,9 +324,12 @@ ndpi_enable_protocols (const struct xt_ndpi_mtinfo*info)
 		        if (ndpi_struct->proto_defaults[i].protoIdx == 0){
 				//Force http or ssl detection for webserver host requests
 	                        if (nfndpi_protocols_http[i]) {
-					 NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, NDPI_PROTOCOL_DNS);
-					 NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, NDPI_PROTOCOL_HTTP);
-				 	 NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, NDPI_PROTOCOL_SSL);
+					if (ndpi_struct->proto_defaults[NDPI_PROTOCOL_DNS].protoIdx == 0)
+						 NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, NDPI_PROTOCOL_DNS);
+					if (ndpi_struct->proto_defaults[NDPI_PROTOCOL_HTTP].protoIdx == 0)
+						 NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, NDPI_PROTOCOL_HTTP);
+					if (ndpi_struct->proto_defaults[NDPI_PROTOCOL_SSL].protoIdx == 0)
+					 	 NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, NDPI_PROTOCOL_SSL);
 				}
 
 				atomic_inc(&protocols_cnt[i-1]);
