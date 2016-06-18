@@ -14,6 +14,7 @@ apt-get install libtool
 apt-get install autoconf
 apt-get install pkg-config
 apt-get install subversion
+apt-get install libpcap-dev 
 apt-get install iptables-dev 
 cd /usr/src/ndpi-netfilter
 tar xvfz tar xvfz nDPI.tar.gz

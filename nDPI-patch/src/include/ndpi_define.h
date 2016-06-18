@@ -1,7 +1,6 @@
 /*
  *
- * Copyright (C) 2011-15 - ntop.org
- * Copyright (C) 2009-2011 by ipoque GmbH
+ * Copyright (C) 2011-16 - ntop.org
  *
  * This file is part of nDPI, an open source deep packet inspection
  * library based on the OpenDPI and PACE technology by ipoque GmbH
@@ -18,6 +17,8 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with nDPI.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Rev.1
  *
  */
 
@@ -62,7 +63,9 @@
 #endif
 
 #ifdef WIN32
+#ifndef __LITTLE_ENDIAN__
 #define __LITTLE_ENDIAN__ 1
+#endif
 #endif
 
 #if !(defined(__LITTLE_ENDIAN__) || defined(__BIG_ENDIAN__))
@@ -72,13 +75,6 @@
 #define __BIG_ENDIAN__
 #endif
 
-/* Kernel modules */
-#if defined(__LITTLE_ENDIAN)
-#define __LITTLE_ENDIAN__
-#endif
-#if defined(__BIG_ENDIAN)
-#define __BIG_ENDIAN__
-#endif
 /* Everything else */
 #if (defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN__))
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
@@ -90,7 +86,7 @@
 
 #endif
 
-#define NDPI_USE_ASYMMETRIC_DETECTION             0
+#define NDPI_USE_ASYMMETRIC_DETECTION                           0
 #define NDPI_SELECTION_BITMASK_PROTOCOL_SIZE			u_int32_t
 
 #define NDPI_SELECTION_BITMASK_PROTOCOL_IP			(1<<0)
@@ -173,24 +169,24 @@
 /* TODO: rebuild all memory areas to have a more aligned memory block here */
 
 /* DEFINITION OF MAX LINE NUMBERS FOR line parse algorithm */
-#define NDPI_MAX_PARSE_LINES_PER_PACKET                        64
+#define NDPI_MAX_PARSE_LINES_PER_PACKET                         64
 
 #define MAX_PACKET_COUNTER                                   65000
 #define MAX_DEFAULT_PORTS                                        5
 
 #define NDPI_DIRECTCONNECT_CONNECTION_IP_TICK_TIMEOUT          600
 #define NDPI_IRC_CONNECTION_TIMEOUT                            120
-#define NDPI_GNUTELLA_CONNECTION_TIMEOUT                       60
-#define NDPI_BATTLEFIELD_CONNECTION_TIMEOUT                    60
-#define NDPI_THUNDER_CONNECTION_TIMEOUT                        30
-#define NDPI_RTSP_CONNECTION_TIMEOUT                           5
-#define NDPI_TVANTS_CONNECTION_TIMEOUT                         5
-#define NDPI_YAHOO_DETECT_HTTP_CONNECTIONS                     1
-#define NDPI_YAHOO_LAN_VIDEO_TIMEOUT                           30
+#define NDPI_GNUTELLA_CONNECTION_TIMEOUT                        60
+#define NDPI_BATTLEFIELD_CONNECTION_TIMEOUT                     60
+#define NDPI_THUNDER_CONNECTION_TIMEOUT                         30
+#define NDPI_RTSP_CONNECTION_TIMEOUT                             5
+#define NDPI_TVANTS_CONNECTION_TIMEOUT                           5
+#define NDPI_YAHOO_DETECT_HTTP_CONNECTIONS                       1
+#define NDPI_YAHOO_LAN_VIDEO_TIMEOUT                            30
 #define NDPI_ZATTOO_CONNECTION_TIMEOUT                         120
-#define NDPI_ZATTOO_FLASH_TIMEOUT                              5
-#define NDPI_JABBER_STUN_TIMEOUT                               30
-#define NDPI_JABBER_FT_TIMEOUT				       5
+#define NDPI_ZATTOO_FLASH_TIMEOUT                                5
+#define NDPI_JABBER_STUN_TIMEOUT                                30
+#define NDPI_JABBER_FT_TIMEOUT				         5
 #define NDPI_SOULSEEK_CONNECTION_IP_TICK_TIMEOUT               600
 
 #ifdef NDPI_ENABLE_DEBUG_MESSAGES
@@ -207,7 +203,7 @@
 
 #else							/* NDPI_ENABLE_DEBUG_MESSAGES */
 
-#if defined(WIN32)
+#ifdef WIN32
 #define NDPI_LOG(...) {}
 #else
 #define NDPI_LOG(proto, mod, log_level, args...) {}
@@ -249,7 +245,7 @@
 #define NDPI_BITMASK_SET(a, b)    { memcpy(&a, &b, sizeof(NDPI_PROTOCOL_BITMASK)); }
 
 /* this is a very very tricky macro *g*,
-  * the compiler will remove all shifts here if the protocol is static...
+ * the compiler will remove all shifts here if the protocol is static...
  */
 #define NDPI_ADD_PROTOCOL_TO_BITMASK(bmask,value)     NDPI_SET(&bmask,value)
 #define NDPI_DEL_PROTOCOL_FROM_BITMASK(bmask,value)   NDPI_CLR(&bmask,value)
@@ -301,9 +297,15 @@
 #endif
 #else
 #error "__BYTE_ORDER MUST BE DEFINED !"
-#endif							/* __BYTE_ORDER */
+#endif                                                  /* __BYTE_ORDER */
 
 /* define memory callback function */
 #define match_first_bytes(payload,st) (memcmp((payload),(st),(sizeof(st)-1))==0)
+
+#if defined(WIN32) && !defined(snprintf)
+#define snprintf _snprintf 
+#endif
+
+#define NDPI_MAX_DNS_REQUESTS                   16
 
 #endif /* __NDPI_DEFINE_INCLUDE_FILE__ */

@@ -35,49 +35,53 @@ struct xt_ndpi_mtinfo {
         NDPI_PROTOCOL_BITMASK flags;
 };
 
-/* /usr/src/nDPI/src/include/ndpi_protocol_ids.h */
+/* /usr/src/nDPI/src/include/ndpi_protocol_ids.h
+ - protocols summ per line: 9, 23, 29, 37, 52, 63, 75, 90, 104, 114, 126, 135, 144, 156, 170, 185, 197, 208, 220, 225
+*/
 #ifndef NDPI_PROTOCOL_LONG_STRING
 #define NDPI_PROTOCOL_LONG_STRING "Unknown","FTP_CONTROL","MAIL_POP","MAIL_SMTP","MAIL_IMAP","DNS","IPP","HTTP","MDNS","NTP",\
 "NETBIOS","NFS","SSDP","BGP","SNMP","XDMCP","SMB","SYSLOG","DHCP","POSTGRES","MYSQL","TDS","DIRECT_DOWNLOAD_LINK","MAIL_POPS",\
-"APPLEJUICE","DIRECTCONNECT","SOCRATES","WINMX","VMWARE","MAIL_SMTPS",\
+"APPLEJUICE","DIRECTCONNECT","SOCRATES","COAP","VMWARE","MAIL_SMTPS",\
 "FILETOPIA","IMESH","KONTIKI","OPENFT","FASTTRACK","GNUTELLA","EDONKEY","BITTORRENT",\
 "EPP","AVI","FLASH","OGG","MPEG","QUICKTIME","REALMEDIA","WINDOWSMEDIA","MMS","XBOX","QQ","MOVE","RTSP","MAIL_IMAPS","ICECAST",\
-"PPLIVE","PPSTREAM","ZATTOO","SHOUTCAST","SOPCAST","TVANTS","TVUPLAYER","HTTP_APPLICATION_VEOHTV","QQLIVE","THUNDER","SOULSEEK",\
+"PPLIVE","PPSTREAM","ZATTOO","SHOUTCAST","SOPCAST","TVANTS","TVUPLAYER","HTTP_DOWNLOAD","QQLIVE","THUNDER","SOULSEEK",\
 "SSL_NO_CERT","IRC","AYIYA","UNENCRYPED_JABBER","MSN","OSCAR","YAHOO","BATTLEFIELD","QUAKE","VRRP","STEAM","HALFLIFE2",\
 "WORLDOFWARCRAFT","TELNET","STUN","IPSEC","GRE","ICMP","IGMP","EGP","SCTP","OSPF","IP_IN_IP","RTP","RDP","VNC","PCANYWHERE",\
 "SSL","SSH","USENET","MGCP","IAX","TFTP","AFP","STEALTHNET","AIMINI","SIP","TRUPHONE","ICMPV6","DHCPV6","ARMAGETRON",\
 "CROSSFIRE","DOFUS","FIESTA","FLORENSIA","GUILDWARS","HTTP_APPLICATION_ACTIVESYNC","KERBEROS","LDAP","MAPLESTORY","MSSQL",\
 "PPTP","WARCRAFT3","WORLD_OF_KUNG_FU","MEEBO","FACEBOOK","TWITTER","DROPBOX","GMAIL","GOOGLE_MAPS","YOUTUBE","SKYPE","GOOGLE",\
-"DCERPC","NETFLOW","SFLOW","HTTP_CONNECT","HTTP_PROXY","CITRIX","NETFLIX","LASTFM","GROOVESHARK",\
+"DCERPC","NETFLOW","SFLOW","HTTP_CONNECT","HTTP_PROXY","CITRIX","NETFLIX","LASTFM","WAZE",\
 "SKYFILE_PREPAID","SKYFILE_RUDICS","SKYFILE_POSTPAID","CITRIX_ONLINE","APPLE","WEBEX","WHATSAPP","APPLE_ICLOUD","VIBER",\
 "APPLE_ITUNES","RADIUS","WINDOWS_UPDATE","TEAMVIEWER","TUENTI","LOTUS_NOTES","SAP","GTP","UPNP","LLMNR","REMOTE_SCAN","SPOTIFY",\
 "WEBM","H323","OPENVPN","NOE","CISCOVPN","TEAMSPEAK","TOR","SKINNY","RTCP","RSYNC","ORACLE","CORBA","UBUNTUONE","WHOIS_DAS",\
-"COLLECTD","SOCKS5","SOCKS4","RTMP","FTP_DATA","WIKIPEDIA","ZMQ","AMAZON","EBAY","CNN","MEGACO","REDIS","PANDO","VHUA","TELEGRAM",\
+"COLLECTD","SOCKS","MS_LYNC","RTMP","FTP_DATA","WIKIPEDIA","ZMQ","AMAZON","EBAY","CNN","MEGACO","REDIS","PANDO","VHUA","TELEGRAM",\
 "VEVO","PANDORA","QUIC","WHATSAPP_VOICE","EAQ","TIMMEU","TORCEDOR","KAKAOTALK","KAKAOTALK_VOICE","TWITCH","QUICKPLAY","TIM",\
 "MPEGTS","SNAPCHAT","SIMET","OPENSIGNAL","99TAXI","EASYTAXI","GLOBOTV","TIMSOMDECHAMADA","TIMMENU","TIMPORTASABERTAS","TIMRECARGA",\
-"TIMBETA","DEEZER","INSTAGRAM","MICROSOFT","STARCRAFT","TEREDO","HOTSPOT_SHIELD","HEP","UBNTAC2","MS_LYNC","CHECK"
+"TIMBETA","DEEZER","INSTAGRAM","MICROSOFT","STARCRAFT","TEREDO","HOTSPOT_SHIELD","HEP","UBNTAC2","OCS","OFFICE_365","CLOUDFLARE",\
+"MS_ONE_DRIVE","MQTT","RX","WEIBO","OPENDNS","CHECK"
 #endif
 
 #ifndef NDPI_PROTOCOL_SHORT_STRING
 #define NDPI_PROTOCOL_SHORT_STRING "unknown","ftp","pop","smtp","imap","dns","ipp","http","mdns","ntp",\
 "netbios","nfs","ssdp","bgp","snmp","xdmcp","smb","syslog","dhcp","postgres","mysql","tds","directdownload","pops",\
-"applejuice","directconnect","socrates","winmx","vmware","smtps",\
+"applejuice","directconnect","socrates","coap","vmware","smtps",\
 "filetopia","imesh","kontiki","openft","fasttrack","gnutella","edonkey","bittorrent",\
 "epp","avi","flash","ogg","mpeg","quicktime","realmedia","windowsmedia","mms","xbox","qq","move","rtsp","imaps","icecast",\
-"pplive","ppstream","zattoo","shoutcast","sopcast","tvants","tvuplayer","http_application_veohtv","qqlive","thunder","soulseek",\
+"pplive","ppstream","zattoo","shoutcast","sopcast","tvants","tvuplayer","http_download","qqlive","thunder","soulseek",\
 "ssl_no_cert","irc","ayiya","unencryped_jabber","msn","oscar","yahoo","battlefield","quake","vrrp","steam","halflife2",\
 "worldofwarcraft","telnet","stun","ipsec","gre","icmp","igmp","egp","sctp","ospf","ipip","rtp","rdp","vnc","pcanywhere",\
 "ssl","ssh","usenet","mgcp","iax","tftp","afp","stealthnet","aimini","sip","truphone","icmpv6","dhcpv6","armagetron",\
 "crossfire","dofus","fiesta","florensia","guildwars","http_application_activesync","kerberos","ldap","maplestory","mssql",\
 "pptp","warcraft3","world_of_kung_fu","meebo","facebook","twitter","dropbox","gmail","google_maps","youtube","skype","google",\
-"dcerpc","netflow","sflow","http_connect","http_proxy","citrix","netflix","lastfm","grooveshark",\
+"dcerpc","netflow","sflow","http_connect","http_proxy","citrix","netflix","lastfm","waze",\
 "skyfile_prepaid","skyfile_rudics","skyfile_postpaid","citrix_online","apple","webex","whatsapp","apple_icloud","viber",\
 "apple_itunes","radius","windows_update","teamviewer","tuenti","lotusnotes","sap","gtp","upnp","llmnr","remotescan","spotify",\
 "webm","h323","openvpn","noe","ciscovpn","teamspeak","tor","skinny","rtcp","rsync","oracle","corba","ubuntuone","whois_das",\
-"collectd","socks5","socks4","rtmp","ftpdata","wikipedia","zmq","amazon","ebay","cnn","megaco","redis","pando","vhua","telegram",\
+"collectd","socks","ms_lync","rtmp","ftpdata","wikipedia","zmq","amazon","ebay","cnn","megaco","redis","pando","vhua","telegram",\
 "vevo","pandora","quic","whatsapp_voice","eaq","timmeu","torcedor","kakaotalk","kakaotalk_voice","twitch","quickplay","tim",\
 "mpegts","snapchat","simet","opensignal","99taxi","easytaxi","globotv","timsomdechamada","timmenu","timportasabertas","timrecarga",\
-"timbeta","deezer","instagram","microsoft","starcraft","teredo","hotspot_shield","hep","ubntac2","ms_lync","dpi_check"
+"timbeta","deezer","instagram","microsoft","starcraft","teredo","hotspot_shield","hep","ubntac2","ocs","office_365","cloudflare",\
+"ms_onedrive","mqtt","rx","weibo","opendns","dpi_check"
 #endif
 
 #ifndef NDPI_LAST_NFPROTO

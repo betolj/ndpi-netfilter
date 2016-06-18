@@ -110,9 +110,9 @@ xt_ndpi-y := main.o \
                 ${NDPI_PRO}/skype.o \
                 ${NDPI_PRO}/smb.o \
                 ${NDPI_PRO}/snmp.o \
+                ${NDPI_PRO}/coap.o \
                 ${NDPI_PRO}/socrates.o \
-                ${NDPI_PRO}/socks4.o \
-                ${NDPI_PRO}/socks5.o \
+                ${NDPI_PRO}/socks45.o \
                 ${NDPI_PRO}/sopcast.o \
                 ${NDPI_PRO}/soulseek.o \
                 ${NDPI_PRO}/spotify.o \
@@ -135,12 +135,10 @@ xt_ndpi-y := main.o \
                 ${NDPI_PRO}/tvuplayer.o \
                 ${NDPI_PRO}/tor.o \
                 ${NDPI_PRO}/usenet.o \
-                ${NDPI_PRO}/veohtv.o \
                 ${NDPI_PRO}/viber.o \
                 ${NDPI_PRO}/vmware.o \
                 ${NDPI_PRO}/vnc.o \
                 ${NDPI_PRO}/warcraft3.o \
-                ${NDPI_PRO}/winmx.o \
                 ${NDPI_PRO}/world_of_kung_fu.o \
                 ${NDPI_PRO}/world_of_warcraft.o \
                 ${NDPI_PRO}/xbox.o \
@@ -150,7 +148,9 @@ xt_ndpi-y := main.o \
                 ${NDPI_PRO}/redis_net.o \
                 ${NDPI_PRO}/vhua.o \
                 ${NDPI_PRO}/ayiya.o \
-                ${NDPI_PRO}/zattoo.o
+                ${NDPI_PRO}/zattoo.o \
+                ${NDPI_PRO}/rx.o \
+                ${NDPI_PRO}/mqtt.o
 
 all:
 	if test -d ${NDPI_SRC}; then \

@@ -10,6 +10,9 @@
  * I renamed it to "patricia.c" since it's not an implementation of a general
  * radix trie.  Also I pulled in various requirements from "prefix.c" and
  * "demo.c" so that it could be used as a standalone API.
+ *
+ * Rev.1
+ *
 
 
  https://github.com/deepfield/MRT/blob/master/COPYRIGHT

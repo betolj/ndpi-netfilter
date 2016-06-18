@@ -1,6 +1,6 @@
 /* 
  * main.c
- * Copyright (C) 2010-2012 G. Elian Gidoni <geg@gnu.org>
+ * Copyright (C) 2010-2012 G. Elian Gidoni (main code)
  *               2012 Ed Wildgoose <lists@wildgooses.com>
  *               2014 Humberto Jucá <betolj@gmail.com>
  * 
@@ -41,6 +41,14 @@
 #include "ndpi_main.h"
 #include "xt_ndpi.h"
 
+/* Debug param */
+static int debug_dpi = 0;
+module_param(debug_dpi, int, 0);
+MODULE_PARM_DESC(debug_dpi, "Enable syslog debug");
+
+static char *prot_long_str[] = { NDPI_PROTOCOL_LONG_STRING };
+
+
 /* flow tracking */
 struct osdpi_flow_node {
         struct rb_node node;
@@ -79,9 +87,7 @@ static atomic_t protocols_cnt[NDPI_LAST_IMPLEMENTED_PROTOCOL];
 static u8 nfndpi_protocols_http[NDPI_LAST_IMPLEMENTED_PROTOCOL];
 
 DEFINE_SPINLOCK(flow_lock);
-DEFINE_SPINLOCK(id_lock);
 DEFINE_SPINLOCK(ipq_lock);
-DEFINE_SPINLOCK(gc_lock);
 
 
 /* detection */
@@ -114,16 +120,19 @@ static void debug_printf(u32 protocol, void *id_struct,
 }
 
 
+/*
 static void *malloc_wrapper(unsigned long size)
 {
 	return kmalloc(size, GFP_KERNEL);
 }
+*/
 
-
+/*
 static void free_wrapper(void *freeable)
 {
 	kfree(freeable);
 }
+*/
 
 
 static struct osdpi_flow_node *
@@ -260,7 +269,6 @@ nfndpi_free_flow (struct nf_conn * ct, struct osdpi_flow_node * auxflow)
 {
         struct osdpi_flow_node * flow;
 
-	spin_lock_bh (&flow_lock);
 	if (auxflow == NULL)
 	        flow = ndpi_flow_search (&osdpi_flow_root, ct);
 	else
@@ -271,7 +279,6 @@ nfndpi_free_flow (struct nf_conn * ct, struct osdpi_flow_node * auxflow)
 	        kmem_cache_free (osdpi_flow_cache, flow);
                 //kfree (flow);
         }
-	spin_unlock_bh (&flow_lock);
 }
 
 
@@ -304,11 +311,9 @@ nfndpi_free_id (union nf_inet_addr * ip)
 {
         struct osdpi_id_node *id;
 
-	spin_lock_bh (&id_lock);
         id = ndpi_id_search (&osdpi_id_root, ip);
         if (id != NULL)
                 kref_put (&id->refcnt, ndpi_id_release);
-	spin_unlock_bh (&id_lock);
 }
 
 
@@ -319,9 +324,9 @@ ndpi_enable_protocols (const struct xt_ndpi_mtinfo*info)
 
         for (i = 1; i <= NDPI_LAST_IMPLEMENTED_PROTOCOL; i++){
 	        if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(info->flags, i) != 0){
-			spin_lock_bh (&ipq_lock);
-
 		        if (ndpi_struct->proto_defaults[i].protoIdx == 0){
+				spin_lock_bh (&ipq_lock);
+
 				//Force http or ssl detection for webserver host requests
 	                        if (nfndpi_protocols_http[i]) {
 					if (ndpi_struct->proto_defaults[NDPI_PROTOCOL_DNS].protoIdx == 0)
@@ -336,8 +341,9 @@ ndpi_enable_protocols (const struct xt_ndpi_mtinfo*info)
 				NDPI_ADD_PROTOCOL_TO_BITMASK(protocols_bitmask, i);
 				ndpi_set_protocol_detection_bitmask2
 		                        (ndpi_struct,&protocols_bitmask);
+
+				spin_unlock_bh (&ipq_lock);
 			}
-			spin_unlock_bh (&ipq_lock);
                 }
         }
 }
@@ -382,8 +388,7 @@ static void ndpi_gc_flow(void)
         do_gettimeofday(&tv);
         t1 = (uint64_t) tv.tv_sec;
         
-	spin_lock_bh (&gc_lock);
-	//pr_info ("xt_ndpi: call garbage collector.\n");
+	if (debug_dpi) pr_info ("xt_ndpi: call garbage collector.\n");
         next = rb_first(&osdpi_flow_root);
         while (next){
                 flow = rb_entry(next, struct osdpi_flow_node, node);
@@ -391,14 +396,14 @@ static void ndpi_gc_flow(void)
 		if (flow && (t1 - flow->ndpi_timeout > 180)) {
 	                ct = flow->ct;
 			ipdst = &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.u3;
-			//pr_info ("xt_ndpi: deleted by garbage collector - proto %d - dst %pI4\n", ipdst, flow->detected_protocol);
+			if (debug_dpi && flow->detected_protocol.protocol <= NDPI_LAST_NFPROTO)
+				pr_info ("xt_ndpi: deleted by garbage collector - proto %s - dst %pI4\n", prot_long_str[flow->detected_protocol.protocol], ipdst);
 
 			nfndpi_free_id (&ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.src.u3);
 			nfndpi_free_id (ipdst);
 			nfndpi_free_flow(ct, flow);
 		}
         }
-	spin_unlock_bh (&gc_lock);
 }
 
 
@@ -409,16 +414,16 @@ ndpi_process_packet(struct nf_conn * ct, const uint64_t time,
 	u32 proto = NDPI_PROTOCOL_UNKNOWN;
         union nf_inet_addr *ipsrc, *ipdst;
         struct osdpi_id_node *src, *dst;
-        struct osdpi_flow_node *flow;
+        struct osdpi_flow_node *flow, *curflow;
 
 	u8 exist_flow=0;
         u64 t1;
         struct timeval tv;
 
+	spin_lock_bh (&flow_lock);
         ipsrc = &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.src.u3;
        	ipdst = &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.u3;
 
-	spin_lock_bh (&flow_lock);
 	flow = ndpi_flow_search (&osdpi_flow_root, ct);
 
 	if (iph->protocol == IPPROTO_TCP) {
@@ -427,8 +432,8 @@ ndpi_process_packet(struct nf_conn * ct, const uint64_t time,
 			return proto;
 		}
                 else if ((tcph->fin || tcph->rst) && flow != NULL) {
-			spin_unlock_bh (&flow_lock);
 			ndpi_kill_flow(ct, ipsrc, ipdst);
+			spin_unlock_bh (&flow_lock);
 			return proto;
 		}
 	}
@@ -438,8 +443,8 @@ ndpi_process_packet(struct nf_conn * ct, const uint64_t time,
 	}
 	else {
 		if (nf_ct_is_dying(ct)) {
-			spin_unlock_bh (&flow_lock);
 			ndpi_kill_flow(ct, ipsrc, ipdst);
+			spin_unlock_bh (&flow_lock);
 			return proto;
 		}
 	}
@@ -451,10 +456,8 @@ ndpi_process_packet(struct nf_conn * ct, const uint64_t time,
 		if (!gc_interval_timeout) gc_interval_timeout = t1;
 		else {
 			if (t1 - gc_interval_timeout > 59) {
-				spin_unlock_bh (&flow_lock);
 				ndpi_gc_flow();
 				gc_interval_timeout = t1;
-				spin_lock_bh (&flow_lock);
 			}
 		}
 
@@ -475,36 +478,46 @@ ndpi_process_packet(struct nf_conn * ct, const uint64_t time,
 		exist_flow=1;
 		if (flow->detected_protocol.protocol) {
 			proto = flow->detected_protocol.protocol;
+			if (debug_dpi && flow->detected_protocol.protocol <= NDPI_LAST_NFPROTO)
+				pr_info ("xt_ndpi: flow detected %s ( dst %pI4 )\n", prot_long_str[flow->detected_protocol.protocol], ipdst);
 			flow->ndpi_timeout = t1;
-			//pr_info ("xt_ndpi: flow detected. %d\n", flow->detected_protocol);
 			spin_unlock_bh (&flow_lock);
 			return proto;
 	        }
 	        else if (!flow->detected_protocol.protocol && (t1 - flow->ndpi_timeout > 30)) {
-			//pr_info ("xt_ndpi: expired.\n");
+			if (debug_dpi) pr_info ("xt_ndpi: dst %pI4 expired\n", ipdst);
 			spin_unlock_bh (&flow_lock);
 			return NDPI_PROTOCOL_UNKNOWN;
-
 	        }
 	}
 
 	/* Invalid DPI flow */
 	if (flow->ndpi_flow == NULL) {
-		spin_unlock_bh (&flow_lock);
+		if (debug_dpi) pr_info ("xt_ndpi: dst %pI4 invalid\n", ipdst);
 		ndpi_kill_flow(ct, ipsrc, ipdst);
+		spin_unlock_bh (&flow_lock);
 		return proto;
 	}
 
 	flow->ndpi_timeout = t1;
-	spin_unlock_bh (&flow_lock);
+
+	/* Set current flow for temporary dump */
+        curflow = kmem_cache_zalloc (osdpi_flow_cache, GFP_ATOMIC);
+        curflow->ndpi_flow = (struct ndpi_flow_struct *)
+                 ((char*)&curflow->ndpi_flow+sizeof(curflow->ndpi_flow));
+        curflow->detected_protocol.protocol = NDPI_PROTOCOL_UNKNOWN;
+        curflow->ndpi_flow = flow->ndpi_flow;
+        spin_unlock_bh (&flow_lock);
 
 
-        spin_lock_bh (&id_lock);
+	/* control the src or dst id into flow spinlock */
+        spin_lock_bh (&flow_lock);
         src = ndpi_id_search (&osdpi_id_root, ipsrc);
 	if (src == NULL) {
                 src = ndpi_alloc_id(ipsrc);
                 if (src == NULL) {
-		        spin_unlock_bh (&id_lock);
+		        spin_unlock_bh (&flow_lock);
+			kmem_cache_free (osdpi_flow_cache, curflow);
 			return proto;
 		}
 	}
@@ -514,36 +527,46 @@ ndpi_process_packet(struct nf_conn * ct, const uint64_t time,
 	if (dst == NULL) {
                 dst = ndpi_alloc_id(ipdst);
                 if (dst == NULL) {
-		        spin_unlock_bh (&id_lock);
+		        spin_unlock_bh (&flow_lock);
+			kmem_cache_free (osdpi_flow_cache, curflow);
 			return proto;
 		}
 	}
 	else if (!exist_flow) kref_get (&dst->refcnt);
-        spin_unlock_bh (&id_lock);
+	spin_unlock_bh (&flow_lock);
 
 
         /* here the actual detection is performed */
-        spin_lock_bh (&ipq_lock);
-        flow->detected_protocol = ndpi_detection_process_packet(ndpi_struct,flow->ndpi_flow,
-                                                (uint8_t *) iph, ipsize, time,
-                                                src->ndpi_id, dst->ndpi_id);
+	spin_lock_bh (&ipq_lock);
+	curflow->detected_protocol = ndpi_detection_process_packet(ndpi_struct,curflow->ndpi_flow,
+                                          (uint8_t *) iph, ipsize, time,
+                                          src->ndpi_id, dst->ndpi_id);
+
+	spin_unlock_bh (&ipq_lock);
 
 	/* set detected protocol */
-	proto = flow->detected_protocol.protocol;
-        if (proto > NDPI_LAST_IMPLEMENTED_PROTOCOL)
-                proto = NDPI_PROTOCOL_UNKNOWN;
-	else {
-	        if (flow->detected_protocol.protocol != NDPI_PROTOCOL_UNKNOWN) {
-			//pr_info ("xt_ndpi: proto detected. %d\n", flow->detected_protocol);
-			/* update timeouts */
-			flow->ndpi_timeout = t1;
-			flow->detection_completed = 1;
+	spin_lock_bh (&flow_lock);
+	if (flow != NULL) {
+		proto = curflow->detected_protocol.protocol;
+		flow->detected_protocol = curflow->detected_protocol;
 
-			/* reset detection */
-			if (flow->ndpi_flow) memset(flow->ndpi_flow, 0, sizeof(*(flow->ndpi_flow)));
-	        }
+	        if (proto > NDPI_LAST_IMPLEMENTED_PROTOCOL)
+	                proto = NDPI_PROTOCOL_UNKNOWN;
+		else {
+		        if (flow->detected_protocol.protocol != NDPI_PROTOCOL_UNKNOWN) {
+				/* update timeouts */
+				if (debug_dpi && proto <= NDPI_LAST_NFPROTO)
+					pr_info ("xt_ndpi: protocol detected %s ( dst %pI4 )\n", prot_long_str[proto], ipdst);
+				flow->ndpi_timeout = t1;
+				flow->detection_completed = 1;
+
+				/* reset detection */
+				if (flow->ndpi_flow) memset(flow->ndpi_flow, 0, sizeof(*(flow->ndpi_flow)));
+		        }
+		}
 	}
-        spin_unlock_bh (&ipq_lock);
+	kmem_cache_free (osdpi_flow_cache, curflow);
+	spin_unlock_bh (&flow_lock);
 
 	return proto;
 }
@@ -623,8 +646,11 @@ ndpi_mt(const struct sk_buff *skb, struct xt_action_param *par)
 		tv.tv_usec / (1000000 / detection_tick_resolution);
 
 	/* reset for new packets and solve ct collisions */
-	if (ctinfo == IP_CT_NEW)
+	if (ctinfo == IP_CT_NEW) {
+		spin_lock_bh (&flow_lock);
 		ndpi_kill_flow(ct, &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.src.u3, &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.u3);
+		spin_unlock_bh (&flow_lock);
+        }
 
 	proto = ndpi_process_packet(ct, time, ip_hdr(skb_use), skb_use->len, tcph);
 	
@@ -633,8 +659,11 @@ ndpi_mt(const struct sk_buff *skb, struct xt_action_param *par)
 		kfree_skb(linearized_skb);
 
         if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(info->flags,proto) != 0) {
-		if(par->hotdrop)
+		if(par->hotdrop) {
+			spin_lock_bh (&flow_lock);
 			ndpi_kill_flow(ct, &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.src.u3, &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.u3);
+			spin_unlock_bh (&flow_lock);
+                }
                 return true;
 	}
 
@@ -659,7 +688,7 @@ ndpi_mt_check(const char *tablename,
                 return -EINVAL;
         }
 
-	NDPI_BITMASK_RESET(protocols_bitmask);
+//	NDPI_BITMASK_RESET(protocols_bitmask);
         ndpi_enable_protocols (info);
 
 	return nf_ct_l3proto_try_module_get (match->family) == 0;
@@ -676,7 +705,7 @@ ndpi_mt_check(const struct xt_mtchk_param *par)
                 return -EINVAL;
         }
 
-	NDPI_BITMASK_RESET(protocols_bitmask);
+//	NDPI_BITMASK_RESET(protocols_bitmask);
         ndpi_enable_protocols (info);
 
 	return nf_ct_l3proto_try_module_get (par->family) == 0;
@@ -730,7 +759,8 @@ static void ndpi_cleanup(void)
         struct osdpi_id_node *id;
         struct osdpi_flow_node *flow;
 
-        ndpi_exit_detection_module(ndpi_struct, free_wrapper);
+        //ndpi_exit_detection_module(ndpi_struct, free_wrapper);
+        ndpi_exit_detection_module(ndpi_struct);
 
         /* free all objects before destroying caches */
         next = rb_first(&osdpi_flow_root);
@@ -775,12 +805,14 @@ static int __init ndpi_mt_init(void)
 {
         int ret=-ENOMEM, i;
 
-	pr_info("xt_ndpi 2.0 (nDPI wrapper module).\n");
+	pr_info("xt_ndpi 3.0 (nDPI wrapper module).\n");
 
-	/* init global detection structure */
-	NDPI_PROTOCOL_BITMASK all;
+	/* init global detection structure
+	//NDPI_PROTOCOL_BITMASK all;
 	ndpi_struct = ndpi_init_detection_module(detection_tick_resolution,
                                                      malloc_wrapper, free_wrapper, debug_printf);
+        */
+	ndpi_struct = ndpi_init_detection_module();
 
 	if (ndpi_struct == NULL) {
 		pr_err("xt_ndpi: global structure initialization failed.\n");
@@ -837,7 +869,8 @@ static int __init ndpi_mt_init(void)
 err_flow:
         kmem_cache_destroy (osdpi_flow_cache);
 err_ipq:
-        ndpi_exit_detection_module(ndpi_struct, free_wrapper);
+        //ndpi_exit_detection_module(ndpi_struct, free_wrapper);
+        ndpi_exit_detection_module(ndpi_struct);
 err_out:
         return ret;
 }
@@ -845,7 +878,7 @@ err_out:
 
 static void __exit ndpi_mt_exit(void)
 {
-	pr_info("xt_ndpi 2.0 unload.\n");
+	pr_info("xt_ndpi 3.0 unload.\n");
 
 	xt_unregister_match(&ndpi_mt_reg);
         ndpi_cleanup();
@@ -856,7 +889,7 @@ module_init(ndpi_mt_init);
 module_exit(ndpi_mt_exit);
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("G. Elian Gidoni <geg@gnu.org>");
+MODULE_AUTHOR("G. Elian Gidoni (main code)");
 MODULE_AUTHOR("Humberto Juca <betolj@gmail.com>");
 MODULE_DESCRIPTION("nDPI wrapper");
 MODULE_ALIAS("ipt_ndpi");
