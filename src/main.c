@@ -516,8 +516,8 @@ ndpi_process_packet(struct nf_conn * ct, const uint64_t time,
 	if (src == NULL) {
                 src = ndpi_alloc_id(ipsrc);
                 if (src == NULL) {
-		        spin_unlock_bh (&flow_lock);
 			kmem_cache_free (osdpi_flow_cache, curflow);
+		        spin_unlock_bh (&flow_lock);
 			return proto;
 		}
 	}
@@ -527,8 +527,8 @@ ndpi_process_packet(struct nf_conn * ct, const uint64_t time,
 	if (dst == NULL) {
                 dst = ndpi_alloc_id(ipdst);
                 if (dst == NULL) {
-		        spin_unlock_bh (&flow_lock);
 			kmem_cache_free (osdpi_flow_cache, curflow);
+		        spin_unlock_bh (&flow_lock);
 			return proto;
 		}
 	}
