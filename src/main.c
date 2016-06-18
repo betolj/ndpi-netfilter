@@ -658,14 +658,12 @@ ndpi_mt(const struct sk_buff *skb, struct xt_action_param *par)
 	if(linearized_skb != NULL)
 		kfree_skb(linearized_skb);
 
+	spin_lock_bh (&ipq_lock);
         if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(info->flags,proto) != 0) {
-		if(par->hotdrop) {
-			spin_lock_bh (&flow_lock);
-			ndpi_kill_flow(ct, &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.src.u3, &ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.u3);
-			spin_unlock_bh (&flow_lock);
-                }
+		spin_unlock_bh (&ipq_lock);
                 return true;
 	}
+	spin_unlock_bh (&ipq_lock);
 
         return false;
 }
