@@ -31,8 +31,10 @@ xt_ndpi-y := main.o \
                 ${NDPI_PRO}/directdownloadlink.o \
                 ${NDPI_PRO}/dns.o \
                 ${NDPI_PRO}/dofus.o \
+                ${NDPI_PRO}/drda.o \
                 ${NDPI_PRO}/dropbox.o \
                 ${NDPI_PRO}/edonkey.o \
+                ${NDPI_PRO}/git.o \
                 ${NDPI_PRO}/gtp.o \
                 ${NDPI_PRO}/lotus_notes.o \
                 ${NDPI_PRO}/fasttrack.o \
@@ -43,13 +45,13 @@ xt_ndpi-y := main.o \
                 ${NDPI_PRO}/ftp_data.o \
                 ${NDPI_PRO}/gnutella.o \
                 ${NDPI_PRO}/guildwars.o \
+                ${NDPI_PRO}/hangout.o \
                 ${NDPI_PRO}/halflife2_and_mods.o \
                 ${NDPI_PRO}/h323.o \
                 ${NDPI_PRO}/http.o \
                 ${NDPI_PRO}/http_activesync.o \
                 ${NDPI_PRO}/iax.o \
                 ${NDPI_PRO}/icecast.o \
-                ${NDPI_PRO}/imesh.o \
                 ${NDPI_PRO}/ipp.o \
                 ${NDPI_PRO}/irc.o \
                 ${NDPI_PRO}/jabber.o \
@@ -61,11 +63,10 @@ xt_ndpi-y := main.o \
                 ${NDPI_PRO}/mail_smtp.o \
                 ${NDPI_PRO}/maplestory.o \
                 ${NDPI_PRO}/mdns.o \
-                ${NDPI_PRO}/meebo.o \
                 ${NDPI_PRO}/mgcp.o \
                 ${NDPI_PRO}/mms.o \
                 ${NDPI_PRO}/msn.o \
-                ${NDPI_PRO}/mssql.o \
+                ${NDPI_PRO}/mssql_tds.o \
                 ${NDPI_PRO}/mysql.o \
                 ${NDPI_PRO}/whoisdas.o \
                 ${NDPI_PRO}/netbios.o \
@@ -84,7 +85,6 @@ xt_ndpi-y := main.o \
                 ${NDPI_PRO}/pplive.o \
                 ${NDPI_PRO}/ppstream.o \
                 ${NDPI_PRO}/pptp.o \
-                ${NDPI_PRO}/twitter.o \
                 ${NDPI_PRO}/qq.o \
                 ${NDPI_PRO}/quake.o \
                 ${NDPI_PRO}/quic.o \
@@ -124,7 +124,6 @@ xt_ndpi-y := main.o \
                 ${NDPI_PRO}/stun.o \
                 ${NDPI_PRO}/syslog.o \
                 ${NDPI_PRO}/tcp_udp.o \
-                ${NDPI_PRO}/tds.o \
                 ${NDPI_PRO}/teamviewer.o \
                 ${NDPI_PRO}/telegram.o \
                 ${NDPI_PRO}/telnet.o \

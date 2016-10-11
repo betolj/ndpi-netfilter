@@ -19,7 +19,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with nDPI.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Rev.1
+ * Rev.1.1
  *
  */
 

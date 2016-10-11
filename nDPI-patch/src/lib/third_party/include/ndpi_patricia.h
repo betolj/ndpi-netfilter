@@ -11,7 +11,7 @@
  * radix trie.  Also, pulled in various requirements from "mrt.h" and added
  * some other things it could be used as a standalone API.
  *
- * Rev.1
+ * Rev.1.1
  *
 
  https://github.com/deepfield/MRT/blob/master/COPYRIGHT

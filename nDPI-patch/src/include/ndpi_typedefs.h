@@ -19,7 +19,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with nDPI.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Rev.1
+ * Rev.2
  *
  */
 
@@ -556,7 +556,7 @@ struct ndpi_flow_tcp_struct {
   u_int32_t mail_pop_stage:2;
 #endif
 #ifdef NDPI_PROTOCOL_MAIL_IMAP
-  u_int32_t mail_imap_stage:3;
+  u_int32_t mail_imap_stage:3, mail_imap_starttls:2;
 #endif
 #ifdef NDPI_PROTOCOL_SKYPE
   u_int8_t skype_packet_id;
@@ -739,6 +739,7 @@ typedef struct ndpi_proto_defaults {
 
 typedef struct ndpi_default_ports_tree_node {
   ndpi_proto_defaults_t *proto;
+  u_int8_t customUserProto;
   u_int16_t default_port;
 } ndpi_default_ports_tree_node_t;
 
@@ -1006,6 +1007,10 @@ struct ndpi_flow_struct {
 #endif
 #ifdef NDPI_PROTOCOL_STARCRAFT
   u_int32_t starcraft_udp_stage : 3;	// 0-7
+#endif
+#ifdef NDPI_PROTOCOL_OPENVPN
+  u_int8_t ovpn_session_id[8];
+  u_int8_t ovpn_counter;
 #endif
 
   /* internal structures to save functions calls */

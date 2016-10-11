@@ -11,7 +11,7 @@
  * radix trie.  Also I pulled in various requirements from "prefix.c" and
  * "demo.c" so that it could be used as a standalone API.
  *
- * Rev.1
+ * Rev.1.1
  *
 
 

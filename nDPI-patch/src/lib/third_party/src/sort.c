@@ -3,7 +3,7 @@
  *
  * Jan 23 2005  Matt Mackall <mpm@selenic.com>
  *
- * Rev.1
+ * Rev.1.1
  */
 
 #ifdef __KERNEL__

@@ -1,7 +1,7 @@
 /* 
  * libxt_ndpi.c
- * Copyright (C) 2010-2012 G. Elian Gidoni <geg@gnu.org>
- *               2012 Ed Wildgoose <lists@wildgooses.com>
+ * Copyright (C) 2010-2012 G. Elian Gidoni
+ *               2012 Ed Wildgoose
  *               2014 Humberto Jucá <betolj@gmail.com>
  * 
  * This file is part of nDPI, an open source deep packet inspection

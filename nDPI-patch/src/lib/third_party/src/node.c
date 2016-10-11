@@ -2,7 +2,7 @@
  * node.c: implementation of automata node
  * This file is part of multifast.
  *
- * Rev.1
+ * Rev.1.1
  *
  Copyright 2010-2012 Kamiar Kanani <kamiar.kanani@gmail.com>
 
