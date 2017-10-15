@@ -21,7 +21,7 @@
  */
 
 /* ****************************************************** */
-
+/* The IP Address can be converted from this Address: http://ncalculators.com/digital-computation/ip-address-hex-decimal-binary.htm*/
 static ndpi_network host_protocol_list[] = {
 
  /*
@@ -44,7 +44,7 @@ static ndpi_network host_protocol_list[] = {
  */
    { 0xD043D800 /* 208.67.216.0/21 */, 21, NDPI_SERVICE_OPENDNS },
 
- /*   
+ /*
     Microsoft Corporation (MS One Drive)
     204.79.195.0/24
     204.79.196.0/23
@@ -52,7 +52,7 @@ static ndpi_network host_protocol_list[] = {
     131.253.12.0/22
     131.253.16.0/23
     131.253.18.0/24
-    65.54.191.0/24 
+    65.54.191.0/24
   */
   { 0xCC4FC300 /* 204.79.195.0/24 */, 24, NDPI_SERVICE_MS_ONE_DRIVE },
   { 0xCC4FC400 /* 204.79.196.0/23 */, 23, NDPI_SERVICE_MS_ONE_DRIVE },
@@ -62,19 +62,19 @@ static ndpi_network host_protocol_list[] = {
   { 0x83FD1200 /* 131.253.18.0/24 */, 24, NDPI_SERVICE_MS_ONE_DRIVE },
   { 0x4136BF00 /* 65.54.191.0/24   */, 24, NDPI_SERVICE_MS_ONE_DRIVE },
 
- /*    
+ /*
     Amazon-EU-AWS Elastic Compute Cloud, EC2 (also used by Netflix)
     46.137.128.0/18
   */
   { 0x2E898000 /* 46.137.128.0/18 */, 18, NDPI_SERVICE_AMAZON },
-  
- /*    
+
+ /*
     Amazon-EU (also used by Netflix)
     176.34.184.0/21
   */
   { 0xB022B800 /* 176.34.184.0/21 */, 21, NDPI_SERVICE_AMAZON },
 
- /*    
+ /*
     Netflix
     23.246.0.0/18
     23.21.190.124/32
@@ -85,7 +85,7 @@ static ndpi_network host_protocol_list[] = {
   { 0x1715BE7C /* 23.21.190.124/32 */, 32, NDPI_SERVICE_NETFLIX },
   { 0x4535E000 /* 69.53.224.0/19 */, 19, NDPI_SERVICE_NETFLIX },
 
-  /*    
+  /*
     Cloudflare
     104.16.0.0/12
     173.245.48.0/20
@@ -97,7 +97,7 @@ static ndpi_network host_protocol_list[] = {
   { 0xA29E0000 /* 162.158.0.0/15 */, 15, NDPI_SERVICE_CLOUDFLARE },
   { 0x8D657D00 /* 141.101.125.0/24 */, 24, NDPI_SERVICE_CLOUDFLARE },
 
- /*    
+ /*
     OFFICE 365
     13.107.1.0/24
     13.107.3.0/24
@@ -123,7 +123,7 @@ static ndpi_network host_protocol_list[] = {
   { 0x0D6B0F00 /* 13.107.15.0 */, 24 , NDPI_SERVICE_OFFICE_365 },
   { 0x0D6B1000 /* 13.107.16.0 */, 24 , NDPI_SERVICE_OFFICE_365 },
 
-  /*    
+  /*
     OCS GO (Orange Cinéma Séries)
     178.248.208.0/21
   */
@@ -175,7 +175,7 @@ static ndpi_network host_protocol_list[] = {
     Skype (Microsoft CDN)
     157.56.135.64/26, 157.56.185.0/26, 157.56.52.0/26,
     157.56.53.128/25, 157.56.198.0/26
-    157.60.0.0/16, 157.54.0.0/15        
+    157.60.0.0/16, 157.54.0.0/15
     13.107.3.128/32
     13.107.3.129/32
     111.221.64.0 - 111.221.127.255
@@ -216,7 +216,7 @@ static ndpi_network host_protocol_list[] = {
   { 0x4A7D0000 /* 74.125.0.0  */, 16, NDPI_SERVICE_GOOGLE },
   { 0x40E91600 /* 64.233.160.0 */, 19, NDPI_SERVICE_GOOGLE },
   { 0xD83AC000 /* 216.58.192.0 */, 19, NDPI_SERVICE_GOOGLE },
-  
+
   /*
     Ubuntu One
     91.189.89.0/21 (255.255.248.0)
@@ -225,22 +225,21 @@ static ndpi_network host_protocol_list[] = {
 
   /*
     Telegram
-    route:          149.154.164.0/22
-    descr:          Telegram Messenger Amsterdam Network
-    origin:         AS62041
-    mnt-by:         MNT-TELEGRAM
-    source:         RIPE # Filtered
-
-    route:          149.154.168.0/22
-    descr:          Telegram Messenger DC5 Network
-    origin:         AS62014
-    mnt-by:         MNT-TELEGRAM
-    source:         RIPE # Filtered
-
     http://myip.ms/view/web_hosting/363906/Telegram_Messenger_Network.html
   */
-  { 0x959AA400 /* 149.154.164.0/22 */, 22, NDPI_PROTOCOL_TELEGRAM},
-  { 0x959AA800 /* 149.154.168.0/22 */, 22, NDPI_PROTOCOL_TELEGRAM},
+   { 0x5B6C0400 /* 91.108.4.0/22 */, 22, NDPI_PROTOCOL_TELEGRAM },
+  { 0x5B6C0800 /* 91.108.8.0/22 */, 22, NDPI_PROTOCOL_TELEGRAM },
+  { 0x5B6C0C00 /* 91.108.12.0/22 */, 22, NDPI_PROTOCOL_TELEGRAM },
+  { 0x5B6C1000 /* 91.108.16.0/22 */, 22, NDPI_PROTOCOL_TELEGRAM },
+  { 0x5B6C1400 /* 91.108.20.0/22 */, 22, NDPI_PROTOCOL_TELEGRAM },
+  { 0x5B6C1500 /* 91.108.21.0/22 */, 22, NDPI_PROTOCOL_TELEGRAM },
+  { 0x5B6C3800 /* 91.108.56.0/22 */, 22, NDPI_PROTOCOL_TELEGRAM },
+  { 0x959AA000 /* 149.154.160.0/22 */, 22, NDPI_PROTOCOL_TELEGRAM },
+  { 0x959AA400 /* 149.154.164.0/22 */, 22, NDPI_PROTOCOL_TELEGRAM },
+  { 0x959AAC00 /* 149.154.172.0/22 */, 22, NDPI_PROTOCOL_TELEGRAM },
+  { 0x959AA800 /* 149.154.168.0/22 */, 22, NDPI_PROTOCOL_TELEGRAM },
+  { 0x5B6C2400 /* 91.108.36.0/23 */, 23, NDPI_PROTOCOL_TELEGRAM },
+  { 0x5B6C2600 /* 91.108.38.0/23 */, 23, NDPI_PROTOCOL_TELEGRAM },
 
   /* TOR  */
   { 0x012A1231, 32, NDPI_PROTOCOL_TOR },
@@ -7343,7 +7342,7 @@ ndpi_protocol_match host_match[] = {
   { "twitter.",				"Twitter",		NDPI_SERVICE_TWITTER, NDPI_PROTOCOL_ACCEPTABLE },
   { "twimg.com",			"Twitter",		NDPI_SERVICE_TWITTER, NDPI_PROTOCOL_ACCEPTABLE },
   { ".viber.com",			"Viber",		NDPI_SERVICE_VIBER, NDPI_PROTOCOL_ACCEPTABLE },
-  { ".cdn.viber.com",			"Viber",		NDPI_SERVICE_VIBER, NDPI_PROTOCOL_ACCEPTABLE },  
+  { ".cdn.viber.com",			"Viber",		NDPI_SERVICE_VIBER, NDPI_PROTOCOL_ACCEPTABLE },
   { "wikipedia.",			"Wikipedia",		NDPI_SERVICE_WIKIPEDIA, NDPI_PROTOCOL_ACCEPTABLE },
   { "wikimedia.",			"Wikipedia",		NDPI_SERVICE_WIKIPEDIA, NDPI_PROTOCOL_ACCEPTABLE },
   { "mediawiki.",			"Wikipedia",		NDPI_SERVICE_WIKIPEDIA, NDPI_PROTOCOL_ACCEPTABLE },
@@ -7367,8 +7366,8 @@ ndpi_protocol_match host_match[] = {
   { "www-cdn.jtvnw.net",                "Twitch",               NDPI_SERVICE_TWITCH, NDPI_PROTOCOL_FUN },
   { "quickplay.com",                    "QuickPlay",            NDPI_SERVICE_QUICKPLAY, NDPI_PROTOCOL_FUN },
   { ".qq.com",                          "QQ",                   NDPI_PROTOCOL_QQ, NDPI_PROTOCOL_FUN },
-  { ".weibo.com",                       "Sina(Weibo)",          NDPI_SERVICE_SINA, NDPI_PROTOCOL_FUN }, 
-  { ".sinaimg.cn",                      "Sina",                 NDPI_SERVICE_SINA, NDPI_PROTOCOL_FUN }, 
+  { ".weibo.com",                       "Sina(Weibo)",          NDPI_SERVICE_SINA, NDPI_PROTOCOL_FUN },
+  { ".sinaimg.cn",                      "Sina",                 NDPI_SERVICE_SINA, NDPI_PROTOCOL_FUN },
   { ".sinajs.cn",                       "Sina",                 NDPI_SERVICE_SINA, NDPI_PROTOCOL_FUN },
   { ".sina.cn",                         "Sina",                 NDPI_SERVICE_SINA, NDPI_PROTOCOL_FUN },
   { ".sina.com.cn",                     "Sina",                 NDPI_SERVICE_SINA, NDPI_PROTOCOL_FUN },
@@ -7395,7 +7394,7 @@ ndpi_protocol_match host_match[] = {
   { "i2-msdn.sec.s-msft.com",           "Microsoft",            NDPI_SERVICE_MICROSOFT, NDPI_PROTOCOL_ACCEPTABLE },
   { ".webtrends.com",                   "Microsoft",            NDPI_SERVICE_MICROSOFT, NDPI_PROTOCOL_ACCEPTABLE },
   { ".msecnd.net",                      "Microsoft",            NDPI_SERVICE_MICROSOFT, NDPI_PROTOCOL_ACCEPTABLE },
-  { ".visualstudio.com",                "Microsoft",            NDPI_SERVICE_MICROSOFT, NDPI_PROTOCOL_ACCEPTABLE },  
+  { ".visualstudio.com",                "Microsoft",            NDPI_SERVICE_MICROSOFT, NDPI_PROTOCOL_ACCEPTABLE },
   { "bn1301.storage.live.com",          "MS_OneDrive",          NDPI_SERVICE_MS_ONE_DRIVE, NDPI_PROTOCOL_ACCEPTABLE },
   { "*.gateway.messenger.live.com",     "MS_OneDrive",          NDPI_SERVICE_MS_ONE_DRIVE, NDPI_PROTOCOL_ACCEPTABLE },
   { "skyapi.live.net",                  "MS_OneDrive",          NDPI_SERVICE_MS_ONE_DRIVE, NDPI_PROTOCOL_ACCEPTABLE },
@@ -7408,7 +7407,7 @@ ndpi_protocol_match host_match[] = {
   { "hotspotshield.com",                "HotspotShield",        NDPI_SERVICE_HOTSPOT_SHIELD, NDPI_PROTOCOL_POTENTIALLY_DANGEROUS },
   { ".webex.com",                       "Webex",                NDPI_PROTOCOL_WEBEX, NDPI_PROTOCOL_ACCEPTABLE },
   { ".ocsdomain.com",                   "OCS",                  NDPI_SERVICE_OCS, NDPI_PROTOCOL_FUN },
-  { "ocs.fr",                           "OCS",                  NDPI_SERVICE_OCS, NDPI_PROTOCOL_FUN },   
+  { "ocs.fr",                           "OCS",                  NDPI_SERVICE_OCS, NDPI_PROTOCOL_FUN },
   { ".ocs.fr",                          "OCS",                  NDPI_SERVICE_OCS, NDPI_PROTOCOL_FUN },
   { ".labgency.ws",                     "OCS",                  NDPI_SERVICE_OCS, NDPI_PROTOCOL_FUN },
 
@@ -7443,8 +7442,9 @@ ndpi_protocol_match host_match[] = {
   { "slack-redir.net",                  "Slack",                NDPI_SERVICE_SLACK, NDPI_PROTOCOL_ACCEPTABLE },
   /* Detected "slack-assets2.s3-us-west-2.amazonaws.com.". Omitted "*amazonaws.com" CDN, but no generic pattern to use on first part */
   { "slack-assets2.s3-",                "Slack",                NDPI_SERVICE_SLACK, NDPI_PROTOCOL_ACCEPTABLE },
-  
-
+  { "web.telegram.org",         "Telegram",       NDPI_PROTOCOL_TELEGRAM, NDPI_PROTOCOL_ACCEPTABLE },
+  { "telegram.org",         "Telegram",       NDPI_PROTOCOL_TELEGRAM, NDPI_PROTOCOL_ACCEPTABLE },
+  { "vesta.web.telegram.org",         "Telegram",       NDPI_PROTOCOL_TELEGRAM, NDPI_PROTOCOL_ACCEPTABLE },
   { NULL, 0 }
 };
 
@@ -7502,7 +7502,7 @@ ndpi_protocol_match content_match[] = {
   { "/base64",				NULL,		        NDPI_PROTOCOL_HTTP_DOWNLOAD, NDPI_PROTOCOL_ACCEPTABLE },
   { "application/gnutar",		NULL,		        NDPI_PROTOCOL_HTTP_DOWNLOAD, NDPI_PROTOCOL_ACCEPTABLE },
   { "application/x-compressed",		NULL,		        NDPI_PROTOCOL_HTTP_DOWNLOAD, NDPI_PROTOCOL_ACCEPTABLE },
-  
+
   { NULL, 0 }
 };
 
@@ -7577,4 +7577,3 @@ static const char *ndpi_en_impossible_bigrams[] = {
   "yj", "yq", "yv", "yz", "yw", "zb", "zc", "zg", "zh", "zj", "zn", "zq", "zr", "zs", "zx", "wh", "wk",
   "wb", "zk", "kp", "zk", "xy",
   NULL };
-

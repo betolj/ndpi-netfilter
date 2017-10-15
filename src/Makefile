@@ -125,7 +125,6 @@ xt_ndpi-y := main.o \
                 ${NDPI_PRO}/syslog.o \
                 ${NDPI_PRO}/tcp_udp.o \
                 ${NDPI_PRO}/teamviewer.o \
-                ${NDPI_PRO}/telegram.o \
                 ${NDPI_PRO}/telnet.o \
                 ${NDPI_PRO}/teamspeak.o \
                 ${NDPI_PRO}/tftp.o \
