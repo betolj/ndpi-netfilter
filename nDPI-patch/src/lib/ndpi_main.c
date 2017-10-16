@@ -164,7 +164,7 @@ extern int atoi(const char *str) {
 int check_punycode_string(char * buffer , int len)
 {
   int i = 0;
-  
+
   while(i++ < len)
   {
     if( buffer[i] == 'x' &&
@@ -1486,11 +1486,6 @@ static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndp
 			    no_master, "UPnP",
 			    ndpi_build_default_ports(ports_a, 1780, 0, 0, 0, 0) /* TCP */,
 			    ndpi_build_default_ports(ports_b, 1900, 0, 0, 0, 0) /* UDP */); /* Missing dissector: port based only */
-    ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_ACCEPTABLE, NDPI_PROTOCOL_TELEGRAM,
-			    no_master,
-			    no_master, "Telegram",
-			    ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
-			    ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
     ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_ACCEPTABLE, NDPI_PROTOCOL_QUIC,
 			    no_master,
 			    no_master, "QUIC",
@@ -1909,7 +1904,7 @@ void* ndpi_init_automa() {
   return(ac_automata_init(ac_match_handler));
 }
 
-int ndpi_add_string_to_automa(void *_automa, char *str) { 
+int ndpi_add_string_to_automa(void *_automa, char *str) {
   AC_PATTERN_t ac_pattern;
   AC_AUTOMATA_t *automa = (AC_AUTOMATA_t*)_automa;
 
@@ -1930,8 +1925,8 @@ int ndpi_match_string(void *_automa, char *string_to_match) {
   int matching_protocol_id = NDPI_PROTOCOL_UNKNOWN;
   AC_TEXT_t ac_input_text;
   AC_AUTOMATA_t *automa = (AC_AUTOMATA_t*)_automa;
-  
-  if((automa == NULL) 
+
+  if((automa == NULL)
      || (string_to_match == NULL)
      || (string_to_match[0] == '\0'))
     return(-2);
@@ -2022,12 +2017,15 @@ static ndpi_default_ports_tree_node_t* ndpi_get_guessed_protocol_id(struct ndpi_
 
     if(ret) return(*(ndpi_default_ports_tree_node_t**)ret);
   }
- 
+
   return(NULL);
 }
 
 /* ****************************************************** */
-
+/*
+ * In this function nDPI will try to find a protocol based on it's port and
+ * save this as ndpi_get_guessed_protocol_id. (e.g. the default port of http is 80)
+*/
 u_int16_t ndpi_guess_protocol_id(struct ndpi_detection_module_struct *ndpi_struct,
                                  u_int8_t proto, u_int16_t sport, u_int16_t dport,
                                  u_int8_t *user_defined_proto) {
@@ -2682,9 +2680,6 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
   /* ZMQ */
   init_zmq_dissector(ndpi_struct, &a, detection_bitmask);
-
-  /* TELEGRAM */
-  init_telegram_dissector(ndpi_struct, &a, detection_bitmask);
 
   /* QUIC */
   init_quic_dissector(ndpi_struct, &a, detection_bitmask);
@@ -3612,16 +3607,28 @@ ndpi_protocol ndpi_detection_process_packet(struct ndpi_detection_module_struct 
     else sport = dport = 0;
 
     flow->guessed_protocol_id = (int16_t)ndpi_guess_protocol_id(ndpi_struct, protocol, sport, dport, &user_defined_proto);
+   
+
+   if(flow->packet.iph) {
+      if((flow->guessed_host_protocol_id = ndpi_network_ptree_match(ndpi_struct, (struct in_addr *)&flow->packet.iph->saddr)) == NDPI_PROTOCOL_UNKNOWN)
+        flow->guessed_host_protocol_id = ndpi_network_ptree_match(ndpi_struct, (struct in_addr *)&flow->packet.iph->daddr);
+   
+      if (flow->guessed_host_protocol_id == NDPI_PROTOCOL_TELEGRAM){   
+         ret.master_protocol = flow->guessed_host_protocol_id, ret.protocol = flow->guessed_host_protocol_id;
+         return(ret);
+       }
+   }
+
 
     if(user_defined_proto && (flow->guessed_protocol_id != NDPI_PROTOCOL_UNKNOWN)) {
       ret.master_protocol = NDPI_PROTOCOL_UNKNOWN, ret.protocol = flow->guessed_protocol_id;
       return(ret);
     }
 
-    if(flow->packet.iph) {
-      if((flow->guessed_host_protocol_id = ndpi_network_ptree_match(ndpi_struct, (struct in_addr *)&flow->packet.iph->saddr)) == NDPI_PROTOCOL_UNKNOWN)
-	flow->guessed_host_protocol_id = ndpi_network_ptree_match(ndpi_struct, (struct in_addr *)&flow->packet.iph->daddr);
-    }
+    //if(flow->packet.iph) {
+    //  if((flow->guessed_host_protocol_id = ndpi_network_ptree_match(ndpi_struct, (struct in_addr *)&flow->packet.iph->saddr)) == NDPI_PROTOCOL_UNKNOWN)
+//	flow->guessed_host_protocol_id = ndpi_network_ptree_match(ndpi_struct, (struct in_addr *)&flow->packet.iph->daddr);
+ //   }
   }
 
   check_ndpi_flow_func(ndpi_struct, flow, &ndpi_selection_packet);
@@ -4815,4 +4822,3 @@ void NDPI_DUMP_BITMASK(NDPI_PROTOCOL_BITMASK a) {
 
   printf("\n");
 }
-
