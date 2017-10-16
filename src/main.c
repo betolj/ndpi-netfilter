@@ -51,8 +51,6 @@ module_param(interval_time, int , 0);
 MODULE_PARM_DESC(interval_time, "Timeout of flows");
 module_param(l7_log, int, 1);
 MODULE_PARM_DESC(l7_log, "Enable l7 log");
-//module_param_named(test_ , test, int, 0644);
-//MODULE_PARM_DESC(test_, "this is a test");
 
 static char *prot_long_str[] = { NDPI_PROTOCOL_LONG_STRING };
 
@@ -647,9 +645,6 @@ static u32 ndpi_process_packet(struct nf_conn * ct, const uint64_t time,
 
 		flow->in_interface = in;
 		flow->out_interface = out;
-//		char host[192];
-//		if(flow->ndpi_flow->host_server_name)
-//			strcpy(host, flow->ndpi_flow->host_server_name);
 
 		if (proto > NDPI_LAST_IMPLEMENTED_PROTOCOL) {
 			proto = NDPI_PROTOCOL_UNKNOWN;
@@ -690,15 +685,6 @@ static u32 ndpi_process_packet(struct nf_conn * ct, const uint64_t time,
 					memset(flow->ndpi_flow, 0, sizeof(*(flow->ndpi_flow)));
 
 			}
-//			else if (l7_log && flow->detected_protocol.protocol == NDPI_PROTOCOL_UNKNOWN
-//				&& !flow->flow_logged && !flow->end_of_flow)
-//			{
-//				flow->flow_logged = 1;
-////				flow->time = t1;
-//				pr_info("xt_ndpi: protocol detected %s  dst %pI4: %u <-> src %pI4: %u [host: %s][bytes: %u][ct:%u][time:%u]\n",
-//									prot_long_str[NDPI_PROTOCOL_UNKNOWN], ipdst, flow->dport,
-//									ipsrc, flow->sport, flow->ndpi_flow->host_server_name, flow->bytes , (long)flow->ct, flow->ndpi_timeout);
-//			}
 
 		}
 	}
