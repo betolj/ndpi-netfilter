@@ -17,7 +17,7 @@ apt-get install subversion
 apt-get install libpcap-dev 
 apt-get install iptables-dev 
 cd /usr/src/ndpi-netfilter
-tar xvfz tar xvfz nDPI.tar.gz
+tar xvfz nDPI.tar.gz
 cd nDPI
 ./autogen.sh
 #./configure –with-pic
